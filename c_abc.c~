@@ -1,15 +1,6 @@
 /**
- * \addtogroup crime
+ * \addtogroup crimec_abc
  * @{
- */
-
-/**
- * \defgroup crimec_echo_app Application that prints information related to packets.
- * @{
- *
- * The c_echo_app prints informative messages such as sending or receiving packets.
- *
- *
  */
 
 /*
@@ -41,21 +32,19 @@
  * SUCH DAMAGE.
  *
  *
+ * Author: Carolina Fortuna <carolina.fortuna@ijs.si>
+ *
  */
+
 /**
  * \file
- *         File for the CRime module Composable Anonymous BroadCast (c_abc).
- *         This module is kept for compatibility (with Rime) reasons, having no
- *         practical value for CRime.
+ *         Composable Anonymous best-effort local area Broad Cast (c_abc)
  * \author
  *         Carolina Fortuna <carolina.fortuna@ijs.si>
  */
 
-#include "contiki.h"
+#include "contiki-net.h"
 #include "net/rime.h"
-#include "net/rime/crime/c_echo_app.h"
-
-#include <stddef.h>             /* For offsetof */
 
 #define DEBUG 1
 #if DEBUG
@@ -65,54 +54,61 @@
 #define PRINTF(...)
 #endif
 
-/*---------------------------------------------------------------------------*/
-rimeaddr_t *
-c_echo_app_forward(struct pipe *p, struct stackmodule_i *module)
-{
-  PRINTF("~c_echo_app_forward \n");
-  return NULL;
+#define EVAL 0
+#if EVAL
+#include <stdio.h>
+#define START_TM vsnTime_freeRunTime()
+#define DURATION_TM(x) vsnTime_freeRunTimeDiff(x)
+#define PRINTFE(...) printf(__VA_ARGS__)
+#else
+#define START_TM 0
+#define DURATION_TM(x) 0
+#define PRINTFE(...)
+#endif
+
+
+void c_abc_open(struct pipe *p, struct stackmodule_i *module) {
+	int start_tm = START_TM;
+	channel_set_attributes(p->channel->channelno, p->channel->attrlist);
+	p->channel->hdrsize = chameleon_hdrsize(p->channel->attrlist);
+	PRINTF("~c_abc_open \n");
+	PRINTFE("\n %d \n", DURATION_TM(start_tm));
 }
 
 /*---------------------------------------------------------------------------*/
-void
-c_echo_app_timedout(struct pipe *p, struct stackmodule_i *module)
-{
-  PRINTF("~c_echo_app_timedout\n");
+void c_abc_close(struct pipe *p, struct stackmodule_i *module) {
+	int start_tm = START_TM;
+	PRINTF("~c_abc_close \n");
+	PRINTFE("\n %d \n", DURATION_TM(start_tm));
 }
 
 /*---------------------------------------------------------------------------*/
-
-void
-c_echo_app_open(struct pipe *p, struct stackmodule_i *module)
-{
-  PRINTF("~c_echo_app_open\n");
+int c_abc_send(struct pipe *p, struct stackmodule_i *module) {
+	int start_tm = START_TM;
+	PRINTF("~c_abc_send: packet '%s' on channel %d hdrsize %d\n",
+			(char *)packetbuf_dataptr(), p->channel->channelno,
+			p->channel->hdrsize);
+	PRINTFE("\n %d \n", DURATION_TM(start_tm));
+	return 1;
 }
 
 /*---------------------------------------------------------------------------*/
-void
-c_echo_app_close(struct pipe *p, struct stackmodule_i *module)
-{
+void c_abc_recv(struct pipe *p, struct stackmodule_i *module) {
+	int start_tm = START_TM;
+	rimeaddr_t tmpaddr;
+
+	rimeaddr_copy(&tmpaddr, packetbuf_addr(PACKETBUF_ADDR_SENDER));
+	set_node_addr(module->stack_id, 1, 0, &tmpaddr);
+	PRINTF("~c_abc_receive: packet %s (%d) on channel %d from %d.%d\n",
+			 (char *)packetbuf_dataptr(),
+			packetbuf_datalen(), p->channel->channelno,
+			tmpaddr.u8[0], tmpaddr.u8[1]);
+	PRINTFE("\n %d \n", DURATION_TM(start_tm));
 }
 
 /*---------------------------------------------------------------------------*/
-int
-c_echo_app_send(struct pipe *p, struct stackmodule_i *module)
-{
-  PRINTF("~c_echo_app_send\n");
-  printf("----------- sending %s \n", (char *)packetbuf_dataptr());
-  return 1;
+void c_abc_sent(struct pipe *p, struct stackmodule_i *module) {
+	PRINTF("~c_abc_sent: after %d transmissions\n", p->num_tx);
 }
 
-/*---------------------------------------------------------------------------*/
-void
-c_echo_app_recv(struct pipe *p, struct stackmodule_i *module)
-{
-  PRINTF("c_echo_app_recv\n");
-  printf("----------- received %s \n", (char *)packetbuf_dataptr());
-}
-
-void
-c_echo_app_sent(struct pipe *p, struct stackmodule_i *module)
-{
-  PRINTF("~c_echo_app_sent\n");
-}
+/** @} */

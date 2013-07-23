@@ -214,7 +214,6 @@ c_dropped(struct pipe *p, struct stackmodule_i *module, uint8_t len)
     return;
   }*/
   uint8_t modno = stack[module[len].stack_id].modno;
-  if(module[len].c_dropped == NULL){return;}
   module[len].c_dropped(p, &module[len]);
   len++;
   if((len >= 0) && (len < modno)) {	

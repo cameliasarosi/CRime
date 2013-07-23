@@ -45,7 +45,6 @@
 
 #include "contiki-net.h"
 #include "net/rime.h"
-#include "vsntime.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -100,8 +99,8 @@ void c_abc_recv(struct pipe *p, struct stackmodule_i *module) {
 
 	rimeaddr_copy(&tmpaddr, packetbuf_addr(PACKETBUF_ADDR_SENDER));
 	set_node_addr(module->stack_id, 1, 0, &tmpaddr);
-	PRINTF("~c_abc_receive: packet %.*s (%d) on channel %d from %d.%d\n",
-			packetbuf_datalen(), (char *)packetbuf_dataptr(),
+	PRINTF("~c_abc_receive: packet %s (%d) on channel %d from %d.%d\n",
+			 (char *)packetbuf_dataptr(),
 			packetbuf_datalen(), p->channel->channelno,
 			tmpaddr.u8[0], tmpaddr.u8[1]);
 	PRINTFE("\n %d \n", DURATION_TM(start_tm));

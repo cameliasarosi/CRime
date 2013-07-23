@@ -1,19 +1,10 @@
 /**
- * \addtogroup crime
+ * \addtogroup rimebroadcast
  * @{
- */
-
-/**
- * \defgroup crimec_echo_app Application that prints information related to packets.
- * @{
- *
- * The c_echo_app prints informative messages such as sending or receiving packets.
- *
- *
  */
 
 /*
- * Copyright (c) 2012, Jozef Stefan Institute.
+ * Copyright (c) 2006, Swedish Institute of Computer Science.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,24 +31,22 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
+ * This file is part of the Contiki operating system.
  *
+ * $Id: broadcast.c,v 1.3 2010/02/23 18:38:05 adamdunkels Exp $
  */
+
 /**
  * \file
- *         File for the CRime module Composable Anonymous BroadCast (c_abc).
- *         This module is kept for compatibility (with Rime) reasons, having no
- *         practical value for CRime.
+ *         Identified best-effort local area broadcast (broadcast)
  * \author
- *         Carolina Fortuna <carolina.fortuna@ijs.si>
+ *         Adam Dunkels <adam@sics.se>
  */
 
-#include "contiki.h"
-#include "net/rime.h"
-#include "net/rime/crime/c_echo_app.h"
+#include "contiki-net.h"
+#include <string.h>
 
-#include <stddef.h>             /* For offsetof */
-
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -66,53 +55,57 @@
 #endif
 
 /*---------------------------------------------------------------------------*/
-rimeaddr_t *
-c_echo_app_forward(struct pipe *p, struct stackmodule_i *module)
+void
+c_broadcast_open(struct pipe *p, struct stackmodule_i *module)
 {
-  PRINTF("~c_echo_app_forward \n");
-  return NULL;
+  channel_set_attributes(p->channel_no, p->attrlist);
+  PRINTF("c_broadcast_open\n");
 }
 
 /*---------------------------------------------------------------------------*/
 void
-c_echo_app_timedout(struct pipe *p, struct stackmodule_i *module)
+c_broadcast_close(struct pipe *p, struct stackmodule_i *module)
 {
-  PRINTF("~c_echo_app_timedout\n");
-}
-
-/*---------------------------------------------------------------------------*/
-
-void
-c_echo_app_open(struct pipe *p, struct stackmodule_i *module)
-{
-  PRINTF("~c_echo_app_open\n");
-}
-
-/*---------------------------------------------------------------------------*/
-void
-c_echo_app_close(struct pipe *p, struct stackmodule_i *module)
-{
+  PRINTF("c_broadcast_close\n");
 }
 
 /*---------------------------------------------------------------------------*/
 int
-c_echo_app_send(struct pipe *p, struct stackmodule_i *module)
+c_broadcast_send(struct pipe *p, struct stackmodule_i *module)
 {
-  PRINTF("~c_echo_app_send\n");
-  printf("----------- sending %s \n", (char *)packetbuf_dataptr());
+  /*PRINTF("c_broadcast_send: %d.%d: broadcast packet\n",
+     rimeaddr_node_addr.u8[0],rimeaddr_node_addr.u8[1]); */
+  packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &rimeaddr_node_addr);
+  PRINTF("c_broadcast_send \n");
+  printaddr(module->stack_id);
   return 1;
 }
 
 /*---------------------------------------------------------------------------*/
 void
-c_echo_app_recv(struct pipe *p, struct stackmodule_i *module)
+c_broadcast_recv(struct pipe *p, struct stackmodule_i *module)
 {
-  PRINTF("c_echo_app_recv\n");
-  printf("----------- received %s \n", (char *)packetbuf_dataptr());
+  PRINTF("c_broadcast_recv \n");
+  rimeaddr_t tmpaddr;
+
+  rimeaddr_copy(&tmpaddr, packetbuf_addr(PACKETBUF_ADDR_SENDER));
+  set_node_addr(module->stack_id, 1, 0, &tmpaddr);
+
+  PRINTF("c_broadcast_recv: %d.%d received packet %s from %d.%d\n",
+         rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
+         (char *)packetbuf_dataptr(), p->in_sender.u8[0], p->in_sender.u8[1]);
+  PRINTF("~c_broadcast_recv \n");
+  printaddr(module->stack_id);
+
 }
 
+/*---------------------------------------------------------------------------*/
 void
-c_echo_app_sent(struct pipe *p, struct stackmodule_i *module)
+c_broadcast_sent(struct pipe *p, struct stackmodule_i *module)
 {
-  PRINTF("~c_echo_app_sent\n");
+  PRINTF("%d.%d: sent status %d num_tx %d\n",
+         rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
+         p->status, p->num_tx);
 }
+
+/** @} */
