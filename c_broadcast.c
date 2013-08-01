@@ -77,6 +77,7 @@ c_broadcast_send(struct pipe *p, struct stackmodule_i *module)
      rimeaddr_node_addr.u8[0],rimeaddr_node_addr.u8[1]); */
   packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &rimeaddr_node_addr);
   PRINTF("c_broadcast_send \n");
+  PRINTF("stack_id: %d\n",module->stack_id);
   printaddr(module->stack_id);
   return 1;
 }
@@ -89,6 +90,7 @@ c_broadcast_recv(struct pipe *p, struct stackmodule_i *module)
   rimeaddr_t tmpaddr;
 
   rimeaddr_copy(&tmpaddr, packetbuf_addr(PACKETBUF_ADDR_SENDER));
+  //PRINTF("adresa broadcast este: %d.%d",tmpaddr.u8[0],tmpaddr.u8[1]);
   set_node_addr(module->stack_id, 1, 0, &tmpaddr);
 
   PRINTF("c_broadcast_recv: %d.%d received packet %s from %d.%d\n",

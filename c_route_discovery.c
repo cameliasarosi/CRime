@@ -110,6 +110,8 @@ static char rrep_pending; /* A reply for a request is pending. */
 
 static void send_rreq(struct pipe *p, struct stackmodule_i *module) {
 	const rimeaddr_t *dest = get_node_addr(module->stack_id, 0, 3);
+	set_node_addr(module->stack_id, 1, 3 , dest);
+	//packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER,dest);
 
 	rimeaddr_t dest_copy;
 
@@ -149,7 +151,8 @@ static void send_rrep(struct pipe *p, struct stackmodule_i *module)
 			get_node_addr(module->stack_id, 1, 0));
 	set_node_addr(module->stack_id + 1, 0, 3,
 			get_node_addr(module->stack_id, 0, 1));
-
+	//printaddr(module->stack_id);
+	  
 	rimeaddr_copy(&saved_dest, dest);
 
 	packetbuf_clear();
@@ -165,8 +168,11 @@ static void send_rrep(struct pipe *p, struct stackmodule_i *module)
 				rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
 				dest->u8[0], dest->u8[1], rt->nexthop.u8[0], rt->nexthop.u8[1]);
 		//unicast_send(&c->rrepconn, &rt->nexthop);
+		module->stack_id = RREP_STACK_ID;
 		c_send(stack[RREP_STACK_ID].pip, stack[RREP_STACK_ID].amodule,
 				stack[RREP_STACK_ID].modno - 2);
+				
+		//stack_send(stack[RREP_STACK_ID].pip,stack[RREP_STACK_ID].modno);		
 	} else {
 		PRINTF("%d.%d: no route for rrep to %d.%d\n",
 				rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
@@ -202,6 +208,7 @@ static void rrep_packet_received(struct pipe *p, struct stackmodule_i *module)
 
 	const rimeaddr_t *from = get_node_addr(module->stack_id, 1, 0);
 
+
 	PRINTF("%d.%d: rrep_packet_received from %d.%d towards %d.%d len %d\n",
 			rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
 			from->u8[0], from->u8[1],
@@ -219,6 +226,8 @@ static void rrep_packet_received(struct pipe *p, struct stackmodule_i *module)
 		PRINTF("rrep for us!\n");
 		rrep_pending = 0;
 		ctimer_stop(&p->route_discovery_param.timer);
+		//c_send(stack[MAIN_STACK_ID].pip, stack[MAIN_STACK_ID].amodule,
+					//stack[MAIN_STACK_ID].modno - 4);
 	} else {
 		rimeaddr_copy(&dest, &msg->dest);
 
@@ -244,13 +253,22 @@ static void rrep_packet_received(struct pipe *p, struct stackmodule_i *module)
 static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 {
 	PRINTF("rreq_packet_received\n");
+	//rimeaddr_t *tmpaddr1 = get_node_addr(module->stack_id, 0, 3);
+  	//packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, tmpaddr1);
 	struct route_msg *msg = packetbuf_dataptr();
+	//rimeaddr_copy(&msg->dest, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
 
-	set_node_addr(module->stack_id, 1, 2, &msg->dest);
+	//set_node_addr(module->stack_id, 1, 2, &msg->dest);
+	
+
 	const rimeaddr_t *from = get_node_addr(module->stack_id, 1, 0);
 
 	const rimeaddr_t *originator = get_node_addr(module->stack_id, 1, 1);
-
+	
+	//const rimeaddr_t *dest = get_node_addr(module->stack_id, 0, 3);
+	//set_node_addr(module->stack_id, 1, 3 , dest);
+	//const rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 1, 3);
+	
 	uint8_t hops = p->hop_no;
 
 	rimeaddr_t *last_rreq_originator =
@@ -265,11 +283,17 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 
 	if (!(rimeaddr_cmp(last_rreq_originator, originator)
 			&& p->route_discovery_param.last_rreq_id == msg->rreq_id)) {
+		
+	//PRINTF("adresa este: %d.%d  ",tmpaddr->u8[0],tmpaddr->u8[1]);
 
 		PRINTF
 		("%d.%d: rreq_packet_received: request for %d.%d originator %d.%d / %d\n",
 				rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1], msg->dest.u8[0],
 				msg->dest.u8[1], originator->u8[0], originator->u8[1], msg->rreq_id);
+		/*PRINTF
+		("%d.%d: rreq_packet_received: request for %d.%d originator %d.%d / %d\n",
+				rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1], tmpaddr->u8[0],
+				tmpaddr->u8[1], originator->u8[0], originator->u8[1], msg->rreq_id);*/
 
 		rimeaddr_copy(last_rreq_originator, originator);
 		p->route_discovery_param.last_rreq_id = msg->rreq_id;
@@ -287,6 +311,7 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 			/* Send route reply back to source. */
 			send_rrep(p, module);
 			return 0; /* Don't continue to flood the rreq packet. */
+			//p->netflood_param.doFlood=0;
 		} else {
 			/*      PRINTF("route request for %d\n", msg->dest_id); */
 			PRINTF("from %d.%d hops %d rssi %d lqi %d\n",
@@ -296,10 +321,13 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 					packetbuf_attr(PACKETBUF_ATTR_LINK_QUALITY));
 			insert_route(originator, from, hops);
 		}
-
-		return 1;
+		//return 1;
+		p->netflood_param.doFlood=1;
+		stack_send(&stack[module->stack_id], module->module_id-1);
+		//c_send(stack[module->stack_id].pip,stack[module->stack_id].amodule, module->module_id - 1);
+		
 	} PRINTF("~rreq_packet_received\n");
-	return 0; /* Don't forward packet. */
+	//return 0; /* Don't forward packet. */
 }
 
 /*---------------------------------------------------------------------------*/
@@ -334,12 +362,26 @@ int c_route_discovery_discover(struct pipe *p, struct stackmodule_i *module) {
 /*---------------------------------------------------------------------------*/
 void c_route_discovery_recv(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("c_route_discovery_recv\n");
+	printaddr(module->stack_id);
+	//PRINTF("stack_id: %d\n",module->stack_id);
+	//int continue_flooding;
 	if (module->stack_id == RREQ_STACK_ID) {
+		//continue_flooding=rreq_packet_received(p, module);
 		rreq_packet_received(p, module);
+		/*if(continue_flooding) 
+			{
+				p->netflood_param.rebroadcast_flag=1;
+				return;
+			}
+		else	{
+			p->netflood_param.rebroadcast_flag=0;
+			return;
+			}*/
 	} else if (module->stack_id == RREP_STACK_ID) {
 		rrep_packet_received(stack[RREQ_STACK_ID].pip,
 				stack[RREQ_STACK_ID].amodule);
-	} PRINTF("~c_route_discovery_recv\n");
+	} 
+	PRINTF("~c_route_discovery_recv\n");
 }
 
 /*---------------------------------------------------------------------------*/

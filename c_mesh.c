@@ -140,12 +140,14 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 			rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
 			tmpaddr->u8[0], tmpaddr->u8[1]);
 	could_send = stack_send(stack, module->module_id - 1);
+	//could_send=c_multihop_send(stack[module->stack_id].pip,stack[module-> stack_id].amodule);
 
 	if (!could_send) {
 		if (p->mesh_param.queued_data != NULL) {
 			queuebuf_free(p->mesh_param.queued_data);
 		} PRINTF("mesh_send: queueing data, sending rreq\n");
 
+		PRINTF("stack_id: %d ",module->stack_id);
 		p->mesh_param.queued_data = queuebuf_new_from_packetbuf();
 		tmpaddr = get_node_addr(module->stack_id, 0, 3);
 		rimeaddr_copy(&p->mesh_param.queued_data_dest, tmpaddr);
@@ -163,6 +165,7 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 
 		c_send(stack[module->stack_id + 1].pip,
 				stack[module->stack_id + 1].amodule, module_id - 1);
+		
 	} PRINTF("~c_mesh_send\n");
 	return 0;
 }

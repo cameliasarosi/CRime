@@ -106,8 +106,10 @@ int
 c_unicast_send(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("c_unicast_send \n");
+  //rimeaddr_t tmpaddr1;
   rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 2);
   packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, tmpaddr);
+  printaddr(module->stack_id);
   return 1;
 }
 /*---------------------------------------------------------------------------*/
@@ -129,6 +131,7 @@ c_unicast_recv(struct pipe *p, struct stackmodule_i *module)
            packetbuf_addr(PACKETBUF_ADDR_SENDER)->u8[1]);
   }
   PRINTF("~c_unicast_recv \n");
+   //printaddr(module->stack_id);
 }
 
 /*---------------------------------------------------------------------------*/

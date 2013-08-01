@@ -80,7 +80,6 @@ amodule0 = (struct stackmodule_i*) calloc(
 stack[0].modno, sizeof(struct stackmodule_i)); 
 addr.u8[0]=rimeaddr_node_addr.u8[0];
 addr.u8[1]=rimeaddr_node_addr.u8[1];
-printf("adresa este: %d.%d",addr.u8[0],addr.u8[1]);
 //addr.u8[0] = 0; addr.u8[1] = 0; 
 set_node_addr(0, OUT, SENDER, &addr); 
 
@@ -122,9 +121,14 @@ amodule0[2].stack_id = 0;
 amodule0[2].module_id = 2; 
 amodule0[2].parent = NULL;
 amodule0[2].time_trigger_flg = 0;
-addr.u8[0] = 3; addr.u8[1] = 0; 
+addr.u8[0] = 3; addr.u8[1] = 0;
+packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER,&addr);
+//rimeaddr_t addr1;
+//rimeaddr_copy(&addr1,packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
+//printf("adresa receiver: %d.%d  ",addr1.u8[0],addr1.u8[1]);
 set_node_addr(0, OUT, RECEIVER, &addr);
-printf("adresa este: %d.%d",addr.u8[0],addr.u8[1]);
+//const rimeaddr_t *addr2=get_node_addr(0,OUT, 2);
+//printf("adresa receiver: %d.%d  ",addr2->u8[0],addr2->u8[1]);
 amodule0[2].c_open = c_unicast_open;
 amodule0[2].c_close = c_unicast_close;
 amodule0[2].c_send = c_unicast_send;
@@ -136,7 +140,10 @@ amodule0[3].module_id = 3;
 amodule0[3].parent = NULL;
 amodule0[3].time_trigger_flg = 0;
 addr.u8[0]=3;addr.u8[1]=0;
-//addr.u8[0] = 1; addr.u8[1] = 0; 
+//packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER,&addr);
+//rimeaddr_copy(&addr1,packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+//printf("adresa ereceiver: %d.%d  ",addr1.u8[0],addr1.u8[1]);
+//addr.u8[0] = 1; addr.u8[1] = 0;  
 set_node_addr(0, OUT, ERECEIVER, &addr);
 addr.u8[0]=rimeaddr_node_addr.u8[0];
 addr.u8[1]=rimeaddr_node_addr.u8[1];
@@ -237,7 +244,6 @@ amodule1[3].stack_id = 1;
 amodule1[3].module_id = 3; 
 amodule1[3].parent = NULL;
 amodule1[3].time_trigger_flg = 0;
-amodule1[3].c_open = c_netflood_open;
 amodule1[3].c_close = c_netflood_close;
 amodule1[3].c_send = c_netflood_send;
 amodule1[3].c_sent = c_netflood_sent;
@@ -248,6 +254,8 @@ amodule1[4].stack_id = 1;
 amodule1[4].module_id = 4; 
 amodule1[4].parent = &amodule0[4];
 amodule1[4].time_trigger_flg = 0;
+addr.u8[0] = 3; addr.u8[1] = 0;
+set_node_addr(1, OUT, ERECEIVER, &addr);
 amodule1[4].c_open = c_route_discovery_open;
 amodule1[4].c_close = c_route_discovery_close;
 amodule1[4].c_send = c_route_discovery_discover;
@@ -260,7 +268,8 @@ struct channel *ch2;
 ch2 = (struct channel*) calloc(1, sizeof(struct channel)); 
 stack[2].pip = pi2; 
 stack[2].pip->channel = ch2; 
-stack[2].modno = 3; 
+stack[2].modno = 4;
+//stack[2].modno = 3;
 struct stackmodule_i *amodule2; 
 amodule2 = (struct stackmodule_i*) calloc( 
 stack[2].modno, sizeof(struct stackmodule_i));
@@ -271,7 +280,8 @@ set_node_addr(0, OUT, SENDER, &addr);
 
 static struct packetbuf_attrlist c_attributes2[] = 
 { 
-C_UNICAST_ATTRIBUTES PACKETBUF_ATTR_LAST 
+C_UNICAST_ATTRIBUTES PACKETBUF_ATTR_LAST
+//C_ROUTE_DISCOVERY_ATTRIBUTES PACKETBUF_ATTR_LAST  
 }; 
 
 stack[2].pip->channel_no = 0; 
@@ -314,6 +324,20 @@ amodule2[2].c_close = c_unicast_close;
 amodule2[2].c_send = c_unicast_send;
 amodule2[2].c_sent = c_unicast_sent;
 amodule2[2].c_recv = c_unicast_recv;
+
+
+amodule2[3].stack_id = 2; 
+amodule2[3].module_id = 3; 
+amodule2[3].parent = &amodule1[4];
+amodule2[3].time_trigger_flg = 0;
+addr.u8[0] = 3; addr.u8[1] = 0;
+set_node_addr(2, OUT, ERECEIVER, &addr);
+amodule2[3].c_open = c_route_discovery_open;
+amodule2[3].c_close = c_route_discovery_close;
+amodule2[3].c_send = c_route_discovery_discover;
+amodule2[3].c_recv = c_route_discovery_recv;
+amodule2[3].c_timed_out = c_route_discovery_timedout;
+
 }
 
 void
@@ -411,7 +435,6 @@ stack_timedout(struct stackmodule_i *module)
   }
   PRINTF("~stack_timedout \n");
 }
-
 /*
 void stack_discover(struct stack_i *stack){
 	PRINTF("stack_discover \n");

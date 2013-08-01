@@ -70,6 +70,13 @@
 #define C_NETFLOOD_ATTRIBUTES   C_BROADCAST_ATTRIBUTES
 #define C_ROUTE_DISCOVERY_ATTRIBUTES C_NETFLOOD_ATTRIBUTES
 
+
+struct netflood_hdr {
+	uint16_t originator_seq_no;
+	rimeaddr_t originator;
+	uint16_t hop_no;
+};
+
 //@definedFor c_polite
 struct polite_p {
   struct ctimer timer;
@@ -85,6 +92,12 @@ struct netflood_p {
   clock_time_t queue_time;
   rimeaddr_t last_originator;
   uint8_t last_originator_seq_no;
+  uint8_t rebroadcast_flag;
+  uint8_t doFlood;
+  struct netflood_hdr hdr;
+  uint8_t hops;
+  struct queuebuf *queuebuf;
+
 };
 
 struct trickle_p {
