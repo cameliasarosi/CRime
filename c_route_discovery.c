@@ -260,7 +260,6 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 
 	//set_node_addr(module->stack_id, 1, 2, &msg->dest);
 	
-
 	const rimeaddr_t *from = get_node_addr(module->stack_id, 1, 0);
 
 	const rimeaddr_t *originator = get_node_addr(module->stack_id, 1, 1);
@@ -364,23 +363,23 @@ void c_route_discovery_recv(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("c_route_discovery_recv\n");
 	printaddr(module->stack_id);
 	//PRINTF("stack_id: %d\n",module->stack_id);
-	//int continue_flooding;
-	if (module->stack_id == RREQ_STACK_ID) {
-		//continue_flooding=rreq_packet_received(p, module);
+	/*if (module->stack_id == RREQ_STACK_ID) {
 		rreq_packet_received(p, module);
-		/*if(continue_flooding) 
-			{
-				p->netflood_param.rebroadcast_flag=1;
-				return;
-			}
-		else	{
-			p->netflood_param.rebroadcast_flag=0;
-			return;
-			}*/
-	} else if (module->stack_id == RREP_STACK_ID) {
+	} 
+	else if (module->stack_id == RREP_STACK_ID) {
 		rrep_packet_received(stack[RREQ_STACK_ID].pip,
 				stack[RREQ_STACK_ID].amodule);
-	} 
+	} */
+	if (stack->merged_flg)
+		{
+		stack->merged_flg=0;
+		rrep_packet_received(stack[RREQ_STACK_ID].pip,
+				stack[RREQ_STACK_ID].amodule);
+		}	
+	else 
+	   	{
+	   	rreq_packet_received(p, module);
+	   	}
 	PRINTF("~c_route_discovery_recv\n");
 }
 

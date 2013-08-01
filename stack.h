@@ -29,6 +29,7 @@ struct stack_i {
   struct stackmodule_i *amodule;
   uint8_t modno;
   uint8_t time_trigger_flg;
+  uint8_t merged_flg;
 };
 
 struct stack_i *stack;
@@ -43,7 +44,9 @@ void stack_close(struct stack_i *stack);
 
 int stack_send(struct stack_i *stack, uint8_t moduleid);
 
-void stack_recv(struct stack_i *stack);
+//void stack_recv(struct stack_i *stack);
+
+void stack_recv(struct stackmodule_i *module);
 
 void stack_dropped(struct stack_i *stack, uint8_t module_id);
 

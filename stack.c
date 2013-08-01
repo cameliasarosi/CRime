@@ -268,8 +268,7 @@ struct channel *ch2;
 ch2 = (struct channel*) calloc(1, sizeof(struct channel)); 
 stack[2].pip = pi2; 
 stack[2].pip->channel = ch2; 
-stack[2].modno = 4;
-//stack[2].modno = 3;
+stack[2].modno = 3;
 struct stackmodule_i *amodule2; 
 amodule2 = (struct stackmodule_i*) calloc( 
 stack[2].modno, sizeof(struct stackmodule_i));
@@ -326,7 +325,7 @@ amodule2[2].c_sent = c_unicast_sent;
 amodule2[2].c_recv = c_unicast_recv;
 
 
-amodule2[3].stack_id = 2; 
+/*amodule2[3].stack_id = 2; 
 amodule2[3].module_id = 3; 
 amodule2[3].parent = &amodule1[4];
 amodule2[3].time_trigger_flg = 0;
@@ -336,7 +335,7 @@ amodule2[3].c_open = c_route_discovery_open;
 amodule2[3].c_close = c_route_discovery_close;
 amodule2[3].c_send = c_route_discovery_discover;
 amodule2[3].c_recv = c_route_discovery_recv;
-amodule2[3].c_timed_out = c_route_discovery_timedout;
+amodule2[3].c_timed_out = c_route_discovery_timedout;*/
 
 }
 
@@ -434,6 +433,34 @@ stack_timedout(struct stackmodule_i *module)
     stack_timedout(stack[stack_id].amodule[mod_id].parent);
   }
   PRINTF("~stack_timedout \n");
+}
+
+void
+stack_recv(struct stackmodule_i *module)
+{
+  PRINTF("stack_recv \n");
+  PRINTF("stack_id: %d\n",module->stack_id);
+  uint8_t stack_id = module->stack_id;
+
+  uint8_t mod_id = module->module_id;
+  //PRINTF("module_id: %d\n",mod_id);
+
+  int modno = stack[stack_id].modno - 1;
+
+  if(mod_id <= modno) 
+  {
+    if(stack[stack_id].amodule[modno].c_recv != NULL) 
+    {
+      c_recv(stack[stack_id].pip, stack[stack_id].amodule, mod_id);
+    }
+  }
+ 
+  if(stack[stack_id].amodule[modno].parent != NULL) 
+  {
+    stack->merged_flg=1;
+    stack_recv(stack[stack_id].amodule[modno].parent);
+  }
+  PRINTF("~stack_recv \n");
 }
 /*
 void stack_discover(struct stack_i *stack){

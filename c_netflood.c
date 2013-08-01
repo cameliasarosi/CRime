@@ -106,10 +106,6 @@
 /*---------------------------------------------------------------------------*/
 void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("c_netflood_recv \n");
-	//const rimeaddr_t *dest = get_node_addr(module->stack_id, 0, 3);
-	//set_node_addr(module->stack_id, 1, 3 , dest);
-	//rimeaddr_t *tmpaddr1 = get_node_addr(module->stack_id, 0, 3);
-  	//packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, tmpaddr1);
 	printaddr(module->stack_id);
 
 	//struct netflood_hdr hdr;
