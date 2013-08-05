@@ -270,15 +270,21 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 	
 	uint8_t hops = p->hop_no;
 
-	rimeaddr_t *last_rreq_originator =
-			&p->route_discovery_param.last_rreq_originator;
+	PRINTF("last_originator param: %d.%d \n ",p->route_discovery_param.last_rreq_originator.u8[0],
+	p->route_discovery_param.last_rreq_originator.u8 [1]);
+	rimeaddr_t *last_rreq_originator= &p->route_discovery_param.last_rreq_originator;
+	rimeaddr_copy(last_rreq_originator,&p->route_discovery_param.last_rreq_originator);
 	uint16_t last_rreq_id = p->route_discovery_param.last_rreq_id;
+	
+	PRINTF("last_originator: %d.%d \n ",last_rreq_originator->u8[0],last_rreq_originator->u8[1]);
+	PRINTF("originator: %d.%d \n ",originator->u8[0],originator->u8[1]);
 
 	PRINTF
 	("%d.%d: rreq_packet_received from %d.%d hops %d rreq_id %d last %d.%d/%d\n",
 			rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1], from->u8[0],
 			from->u8[1], hops, msg->rreq_id, last_rreq_originator->u8[0],
 			last_rreq_originator->u8[1], last_rreq_id);
+
 
 	if (!(rimeaddr_cmp(last_rreq_originator, originator)
 			&& p->route_discovery_param.last_rreq_id == msg->rreq_id)) {
@@ -295,6 +301,10 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 				tmpaddr->u8[1], originator->u8[0], originator->u8[1], msg->rreq_id);*/
 
 		rimeaddr_copy(last_rreq_originator, originator);
+		PRINTF("new last_originator: %d.%d \n ",last_rreq_originator->u8[0],last_rreq_originator->u8[1]);
+		rimeaddr_copy(&p->route_discovery_param.last_rreq_originator,last_rreq_originator);
+		PRINTF("new last_originator param: %d.%d \n ",p->route_discovery_param.last_rreq_originator.u8[0],
+		p->route_discovery_param.last_rreq_originator.u8 [1]);
 		p->route_discovery_param.last_rreq_id = msg->rreq_id;
 
 		if (rimeaddr_cmp(&msg->dest, &rimeaddr_node_addr)) {
@@ -370,9 +380,9 @@ void c_route_discovery_recv(struct pipe *p, struct stackmodule_i *module) {
 		rrep_packet_received(stack[RREQ_STACK_ID].pip,
 				stack[RREQ_STACK_ID].amodule);
 	} */
-	if (stack->merged_flg)
+	if (stack[RREP_STACK_ID].merged_flg)
 		{
-		stack->merged_flg=0;
+		stack[RREP_STACK_ID].merged_flg=0;
 		rrep_packet_received(stack[RREQ_STACK_ID].pip,
 				stack[RREQ_STACK_ID].amodule);
 		}	

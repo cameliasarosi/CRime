@@ -446,7 +446,7 @@ stack_recv(struct stackmodule_i *module)
   //PRINTF("module_id: %d\n",mod_id);
 
   int modno = stack[stack_id].modno - 1;
-
+ 
   if(mod_id <= modno) 
   {
     if(stack[stack_id].amodule[modno].c_recv != NULL) 
@@ -457,10 +457,14 @@ stack_recv(struct stackmodule_i *module)
  
   if(stack[stack_id].amodule[modno].parent != NULL) 
   {
-    stack->merged_flg=1;
-    stack_recv(stack[stack_id].amodule[modno].parent);
+    stack[stack_id].merged_flg=1;
+    uint8_t parent_stack_id = stack[stack_id].amodule[modno].parent->stack_id;
+    uint8_t parent_mod_id = stack[stack_id].amodule[modno].parent->module_id;
+    //PRINTF("stack_id for parent: %d\n",parent_stack_id);
+    //PRINTF("module_id for parent: %d\n",parent_mod_id);
+    stack_recv(&stack[parent_stack_id].amodule[parent_mod_id]);
   }
-  PRINTF("~stack_recv \n");
+    PRINTF("~stack_recv \n");
 }
 /*
 void stack_discover(struct stack_i *stack){
