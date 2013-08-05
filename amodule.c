@@ -155,7 +155,6 @@ c_send(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 {
   PRINTF("c_send %d\n", len);
   int send_flg = module[len].c_send(p, &module[len]);
-
   len--;
   if((len >= 0) && (len < 255) && (send_flg)) {
     c_send(p, module, len);

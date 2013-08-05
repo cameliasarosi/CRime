@@ -378,7 +378,6 @@ stack_send(struct stack_i *stack, uint8_t module_id)
 {
   PRINTF("stack_send %d\n", module_id);
   int p;
-
   int sent_flag = 0;
 
   for(p = 0; p < STACKNO; p++) {
@@ -441,22 +440,27 @@ stack_recv(struct stackmodule_i *module)
   PRINTF("stack_recv \n");
   PRINTF("stack_id: %d\n",module->stack_id);
   uint8_t stack_id = module->stack_id;
-
   uint8_t mod_id = module->module_id;
   //PRINTF("module_id: %d\n",mod_id);
+  
+  if(stack[stack_id].not_dest_flag == 1) {
+  	//stack[mod_id].not_dest_flag = 0;
+	return;
+  }
 
   int modno = stack[stack_id].modno - 1;
  
-  if(mod_id <= modno) 
-  {
-    if(stack[stack_id].amodule[modno].c_recv != NULL) 
-    {
+  if(mod_id <= modno) {
+    if(stack[stack_id].amodule[modno].c_recv != NULL) {
       c_recv(stack[stack_id].pip, stack[stack_id].amodule, mod_id);
     }
   }
+
+  if(module->module_id == 0 && stack[module->stack_id].not_dest_flag == 1) {
+    stack[stack_id].not_dest_flag=0; return;
+  }
  
-  if(stack[stack_id].amodule[modno].parent != NULL) 
-  {
+  if(stack[stack_id].amodule[modno].parent != NULL) {
     stack[stack_id].merged_flg=1;
     uint8_t parent_stack_id = stack[stack_id].amodule[modno].parent->stack_id;
     uint8_t parent_mod_id = stack[stack_id].amodule[modno].parent->module_id;

@@ -124,41 +124,16 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
 	p->netflood_param.queuebuf = queuebuf_new_from_packetbuf();
  
 	packetbuf_hdrreduce(sizeof(struct netflood_hdr));
-	/*if (!(rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
-			&& p->netflood_param.hdr.originator_seq_no
-					<= p->netflood_param.last_originator_seq_no)) {
-	//c_recv(stack[module->stack_id].pip,stack[module->stack_id].amodule,module->module_id +1);		
-	//if(p->netflood_param.rebroadcast_flag)				
-	  //{*/
-		/*if (p->netflood_param.queuebuf != NULL) {
-			queuebuf_to_packetbuf(p->netflood_param.queuebuf);
-			queuebuf_free(p->netflood_param.queuebuf);
-			p->netflood_param.queuebuf = NULL;
-			memcpy(&p->netflood_param.hdr, packetbuf_dataptr(), sizeof(struct netflood_hdr));
-
-			/* Rebroadcast received packet. */
-			/*if (hops < HOPS_MAX) {
-				PRINTF
-				("%d.%d: netflood rebroadcasting %d.%d/%d (%d.%d/%d) hops %d\n",
-						rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
-						hdr.originator.u8[0],hdr.originator.u8[1],hdr.originator_seq_no,
-						p->netflood_param.last_originator.u8[0],
-						p->netflood_param.last_originator.u8[1],
-						p->netflood_param.last_originator_seq_no,hops);
-				//rimeaddr_copy(&p->esender,hdr.originator);
-				set_node_addr(module->stack_id, 1, 1,hdr.originator);
-				printaddr(module->stack_id);
-				hdr.hop_no++;
-				memcpy(packetbuf_dataptr(),hdr, sizeof(struct netflood_hdr));
-				//stack_send(&stack[module->stack_id], module->module_id); //c_send(p, amodule, );
-				c_send(stack[module->stack_id].pip,stack[module->stack_id].amodule, module->module_id - 1);
-				rimeaddr_copy(&p->netflood_param.last_originator,hdr.originator);
-				p->netflood_param.last_originator_seq_no
-						= hdr.originator_seq_no;
-			}*/
-		  // }
-	    //  }
-	//}
+	
+	PRINTF("last_originator param: %d.%d \n ",p->netflood_param.last_originator.u8[0],
+			p->netflood_param.last_originator.u8 [1]);
+	PRINTF("originator: %d.%d \n ",p->netflood_param.hdr.originator.u8[0],p->netflood_param.hdr.originator.u8[1]);
+	
+	if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
+			&& p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
+	 stack[module->stack_id].not_dest_flag=1;
+	}
+	 
 	if (p->netflood_param.queuebuf != NULL) {
 		queuebuf_free(p->netflood_param.queuebuf);
 	}
@@ -186,11 +161,18 @@ void c_netflood_close(struct pipe *p, struct stackmodule_i *module) {
 
 /*---------------------------------------------------------------------------*/
 int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
+	PRINTF("last_originator param: %d.%d \n ",p->netflood_param.last_originator.u8[0],
+			p->netflood_param.last_originator.u8 [1]);
+	PRINTF("originator: %d.%d \n ",p->netflood_param.hdr.originator.u8[0],p->netflood_param.hdr.originator.u8[1]);
 	
-	if (p->netflood_param.doFlood == 1) 
-        {
+	  if (p->netflood_param.doFlood == 1) {
+	     if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
+			&& p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
+	 	stack[module->stack_id].not_dest_flag = 1;
+		}	
+	     if(stack[module->stack_id].not_dest_flag != 1) {
         
-        if (p->netflood_param.queuebuf != NULL) {
+             	if (p->netflood_param.queuebuf != NULL) {
 			queuebuf_to_packetbuf(p->netflood_param.queuebuf);
 			queuebuf_free(p->netflood_param.queuebuf);
 			p->netflood_param.queuebuf = NULL;
@@ -220,10 +202,15 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
 			}
 		}
 		p->netflood_param.doFlood = 0;
+		PRINTF("new last_originator param: %d.%d \n ",p->netflood_param.last_originator.u8[0],
+			p->netflood_param.last_originator.u8 [1]);
+		PRINTF("originator: %d.%d \n ",p->netflood_param.hdr.originator.u8[0],p->netflood_param.hdr.originator.u8[1]);
+	
 		return 1;
-        }
-        else 
-        {
+	    } else {
+	      PRINTF("no netflood rebroadcasting! originator equals to last originator\n");
+	      }
+        } else {
 	PRINTF("c_netflood_send \n");
 	if (packetbuf_hdralloc(sizeof(struct netflood_hdr))) {
 		struct netflood_hdr *hdr = packetbuf_hdrptr();
