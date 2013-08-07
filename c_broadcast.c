@@ -77,7 +77,6 @@ c_broadcast_send(struct pipe *p, struct stackmodule_i *module)
      rimeaddr_node_addr.u8[0],rimeaddr_node_addr.u8[1]); */
   packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &rimeaddr_node_addr);
   PRINTF("c_broadcast_send \n");
-  PRINTF("stack_id: %d\n",module->stack_id);
   printaddr(module->stack_id);
   return 1;
 }

@@ -105,8 +105,25 @@ c_mesh_forward(struct pipe *p, struct stackmodule_i *module) {
 }
 
 /*---------------------------------------------------------------------------*/
-static void found_route(struct route_discovery_conn *rdc,
-		const rimeaddr_t * dest) {
+static void found_route(struct pipe *p, struct stackmodule_i *module) {
+  struct route_entry *rt;
+  rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
+  
+  PRINTF("found route \n");
+  if(p->mesh_param.queued_data != NULL && 
+      rimeaddr_cmp (tmpaddr, &p->mesh_param.queued_data_dest )) {
+    queuebuf_to_packetbuf (p->mesh_param.queued_data);
+    queuebuf_free (p->mesh_param.queued_data);
+    p->mesh_param.queued_data= NULL;
+    rt = route_lookup(tmpaddr);
+      if (rt != NULL) {
+        c_send(stack[module->stack_id].pip, stack[module->stack_id].amodule, module->module_id - 2);
+        //stack_send(&stack[module->stack_id], module->module_id - 2);
+      } else {
+        c_timed_out(stack[module->stack_id].pip, stack[module->stack_id].amodule, 
+                    module->module_id);
+      }
+  }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -184,6 +201,11 @@ void c_mesh_recv(struct pipe *p, struct stackmodule_i *module) {
 	rt = route_lookup(tmpaddr);
 	if (rt != NULL) {
 		route_refresh(rt);
+	}
+	
+	if (stack[RREQ_STACK_ID].rrep_received_flag == 1) {
+	  stack[RREQ_STACK_ID].rrep_received_flag = 0;
+	  found_route(p, module);
 	}
 }
 

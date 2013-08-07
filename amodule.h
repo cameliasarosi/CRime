@@ -116,6 +116,7 @@ struct route_discovery_p {
   rimeaddr_t last_rreq_originator;
   uint16_t last_rreq_id;
   uint16_t rreq_id;
+ // uint8_t rrep_received_flag;
 };
 
 //@definedFor c_multihop

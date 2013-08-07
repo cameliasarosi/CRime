@@ -105,54 +105,42 @@
 
 /*---------------------------------------------------------------------------*/
 void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
-	PRINTF("c_netflood_recv \n");
-	printaddr(module->stack_id);
+  PRINTF("c_netflood_recv \n");
+  memcpy(&p->netflood_param.hdr, packetbuf_dataptr(), sizeof(struct netflood_hdr));
+  p->netflood_param.hops = p->netflood_param.hdr.hop_no;
+  p->hop_no=p->netflood_param.hops;
+  //rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
+  set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
 
-	//struct netflood_hdr hdr;
+  /* Remember packet if we need to forward it. */
+  p->netflood_param.queuebuf = queuebuf_new_from_packetbuf();
 
-	//uint8_t hops;
+  packetbuf_hdrreduce(sizeof(struct netflood_hdr));
 
-	//struct queuebuf *queuebuf;
+  if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
+      && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
+    stack[module->stack_id].not_dest_flag=1;
+  }
 
-	memcpy(&p->netflood_param.hdr, packetbuf_dataptr(), sizeof(struct netflood_hdr));
-	p->netflood_param.hops = p->netflood_param.hdr.hop_no;
-	p->hop_no=p->netflood_param.hops;
-	//rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
-	set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
-	
-	/* Remember packet if we need to forward it. */
-	p->netflood_param.queuebuf = queuebuf_new_from_packetbuf();
- 
-	packetbuf_hdrreduce(sizeof(struct netflood_hdr));
-	
-	PRINTF("last_originator param: %d.%d \n ",p->netflood_param.last_originator.u8[0],
-			p->netflood_param.last_originator.u8 [1]);
-	PRINTF("originator: %d.%d \n ",p->netflood_param.hdr.originator.u8[0],p->netflood_param.hdr.originator.u8[1]);
-	
-	if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
-			&& p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
-	 stack[module->stack_id].not_dest_flag=1;
-	}
-	 
-	if (p->netflood_param.queuebuf != NULL) {
-		queuebuf_free(p->netflood_param.queuebuf);
-	}
+  if (p->netflood_param.queuebuf != NULL) {
+    queuebuf_free(p->netflood_param.queuebuf);
+  }
 }
 
 /*---------------------------------------------------------------------------*/
 void c_netflood_sent(struct pipe *p, struct stackmodule_i *module) {
-	PRINTF("netflood packet sent\n");
+  PRINTF("netflood packet sent\n");
 }
 
 /*---------------------------------------------------------------------------*/
 void c_netflood_dropped(struct pipe *p, struct stackmodule_i *module) {
-	PRINTF("netflood packet dropped\n");
+  PRINTF("netflood packet dropped\n");
 }
 
 /*---------------------------------------------------------------------------*/
 void c_netflood_open(struct pipe *p, struct stackmodule_i *module) {
-	channel_set_attributes(p->channel_no, p->attrlist);
-	PRINTF("~netflood_open\n");
+  channel_set_attributes(p->channel_no, p->attrlist);
+  PRINTF("~netflood_open\n");
 }
 
 /*---------------------------------------------------------------------------*/
@@ -161,78 +149,68 @@ void c_netflood_close(struct pipe *p, struct stackmodule_i *module) {
 
 /*---------------------------------------------------------------------------*/
 int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
-	PRINTF("last_originator param: %d.%d \n ",p->netflood_param.last_originator.u8[0],
-			p->netflood_param.last_originator.u8 [1]);
-	PRINTF("originator: %d.%d \n ",p->netflood_param.hdr.originator.u8[0],p->netflood_param.hdr.originator.u8[1]);
-	
-	  if (p->netflood_param.doFlood == 1) {
-	     if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
-			&& p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
-	 	stack[module->stack_id].not_dest_flag = 1;
-		}	
-	     if(stack[module->stack_id].not_dest_flag != 1) {
-        
-             	if (p->netflood_param.queuebuf != NULL) {
-			queuebuf_to_packetbuf(p->netflood_param.queuebuf);
-			queuebuf_free(p->netflood_param.queuebuf);
-			p->netflood_param.queuebuf = NULL;
-			memcpy(&p->netflood_param.hdr, packetbuf_dataptr(), sizeof(struct netflood_hdr));
-        
-       /* Rebroadcast received packet. */
-			if (p->netflood_param.hops < HOPS_MAX) {
-				PRINTF
-				("%d.%d: netflood rebroadcasting %d.%d/%d (%d.%d/%d) hops %d\n",
-						rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
-						p->netflood_param.hdr.originator.u8[0], p->netflood_param.hdr.originator.u8[1], 							p->netflood_param.hdr.originator_seq_no,
-						p->netflood_param.last_originator.u8[0],
-						p->netflood_param.last_originator.u8[1],
-						p->netflood_param.last_originator_seq_no, p->netflood_param.hops);
-				//rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
-				set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
-				printaddr(module->stack_id);
 
-				p->netflood_param.hdr.hop_no++;
-				memcpy(packetbuf_dataptr(), &p->netflood_param.hdr, sizeof(struct netflood_hdr));
-				//stack_send(&stack[module->stack_id], module->module_id); //c_send(p, amodule, );
-				//c_send(stack[module->stack_id].pip,stack[module->stack_id].amodule, module->module_id - 1);
-				rimeaddr_copy(&p->netflood_param.last_originator,
-						&p->netflood_param.hdr.originator);
-				p->netflood_param.last_originator_seq_no
-						= p->netflood_param.hdr.originator_seq_no;
-			}
-		}
-		p->netflood_param.doFlood = 0;
-		PRINTF("new last_originator param: %d.%d \n ",p->netflood_param.last_originator.u8[0],
-			p->netflood_param.last_originator.u8 [1]);
-		PRINTF("originator: %d.%d \n ",p->netflood_param.hdr.originator.u8[0],p->netflood_param.hdr.originator.u8[1]);
-	
-		return 1;
-	    } else {
-	      PRINTF("no netflood rebroadcasting! originator equals to last originator\n");
-	      }
-        } else {
-	PRINTF("c_netflood_send \n");
-	if (packetbuf_hdralloc(sizeof(struct netflood_hdr))) {
-		struct netflood_hdr *hdr = packetbuf_hdrptr();
+  if (p->netflood_param.doFlood == 1) {
+    if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
+        && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
+      stack[module->stack_id].not_dest_flag = 1;
+    }	
+    if(stack[module->stack_id].not_dest_flag != 1) {
 
-		rimeaddr_copy(&hdr->originator, &rimeaddr_node_addr);
-		rimeaddr_copy(&p->netflood_param.last_originator, &hdr->originator);
-		p->netflood_param.last_originator_seq_no = hdr->originator_seq_no
-				= p->seq_no;
-		hdr->hop_no = 0;
-		/*PRINTF("%d.%d: netflood sending %d.%d seqno %d hops %d %s\n",
+      if (p->netflood_param.queuebuf != NULL) {
+        queuebuf_to_packetbuf(p->netflood_param.queuebuf);
+        queuebuf_free(p->netflood_param.queuebuf);
+        p->netflood_param.queuebuf = NULL;
+        memcpy(&p->netflood_param.hdr, packetbuf_dataptr(), sizeof(struct netflood_hdr));
+
+        /* Rebroadcast received packet. */
+        if (p->netflood_param.hops < HOPS_MAX) {
+          PRINTF
+          ("%d.%d: netflood rebroadcasting %d.%d/%d (%d.%d/%d) hops %d\n",
+           rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
+           p->netflood_param.hdr.originator.u8[0], p->netflood_param.hdr.originator.u8[1],
+           p->netflood_param.hdr.originator_seq_no, p->netflood_param.last_originator.u8[0],
+           p->netflood_param.last_originator.u8[1],
+           p->netflood_param.last_originator_seq_no, p->netflood_param.hops);
+          //rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
+          set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
+          printaddr(module->stack_id);
+          p->netflood_param.hdr.hop_no++;
+          memcpy(packetbuf_dataptr(), &p->netflood_param.hdr, sizeof(struct netflood_hdr));
+          //stack_send(&stack[module->stack_id], module->module_id); //c_send(p, amodule, );
+          rimeaddr_copy(&p->netflood_param.last_originator,
+                        &p->netflood_param.hdr.originator);
+          p->netflood_param.last_originator_seq_no = p->netflood_param.hdr.originator_seq_no;
+        }
+      }
+      p->netflood_param.doFlood = 0;
+      return 1;
+    } else {
+      PRINTF("no netflood rebroadcasting! originator equals to last originator\n");
+    }
+  } else {
+    PRINTF("c_netflood_send \n");
+    if (packetbuf_hdralloc(sizeof(struct netflood_hdr))) {
+      struct netflood_hdr *hdr = packetbuf_hdrptr();
+
+      rimeaddr_copy(&hdr->originator, &rimeaddr_node_addr);
+      rimeaddr_copy(&p->netflood_param.last_originator, &hdr->originator);
+      p->netflood_param.last_originator_seq_no = hdr->originator_seq_no
+          = p->seq_no;
+      hdr->hop_no = 0;
+      /*PRINTF("%d.%d: netflood sending %d.%d seqno %d hops %d %s\n",
 		 rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
 		 hdr->originator.u8[0], hdr->originator.u8[1],
 		 hdr->originator_seq_no, hdr->hop_no = 0,
 		 (char *)packetbuf_hdrptr()); */
-		printaddr(module->stack_id);
-		return 1;
-	}
-	return 0;
-	}
-	if (p->netflood_param.queuebuf != NULL) {
-		queuebuf_free(p->netflood_param.queuebuf);
-	}
+      printaddr(module->stack_id);
+      return 1;
+    }
+    return 0;
+  }
+  if (p->netflood_param.queuebuf != NULL) {
+    queuebuf_free(p->netflood_param.queuebuf);
+  }
 }
 
 /*---------------------------------------------------------------------------*/

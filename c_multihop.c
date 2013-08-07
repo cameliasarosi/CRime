@@ -109,8 +109,7 @@ int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 	//printaddr(module->stack_id);
 	packetbuf_compact();
 	rimeaddr_t *nexthop = (rimeaddr_t *) c_forward(stack[module->stack_id].pip,
-			stack[module-> stack_id].amodule, module->module_id);
-
+			stack[module->stack_id].amodule, module->module_id);
 	if (nexthop == NULL) {
 		PRINTF("multihop_send: no route\n");
 		return 0;
@@ -129,6 +128,9 @@ int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 		packetbuf_set_attr(PACKETBUF_ATTR_HOPS, 1);
 		return 1;
 	}
+}
+void c_multihop_resend(struct pipe *p, struct stackmodule_i *module) {
+      //c_unicast_send(stack[module->stack_id].pip, stack[module->stack_id].amodule);
 }
 
 void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
