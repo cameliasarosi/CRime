@@ -437,7 +437,7 @@ stack_recv(struct stackmodule_i *module)
     return;
   }
 
-  if(stack[stack_id].amodule[modno].parent != NULL ) {
+  if(stack[stack_id].amodule[modno].parent != NULL) {
     stack[stack_id].merged_flg=1;
     uint8_t parent_stack_id = stack[stack_id].amodule[modno].parent->stack_id;
     uint8_t parent_mod_id = stack[stack_id].amodule[modno].parent->module_id;

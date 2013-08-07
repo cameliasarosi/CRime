@@ -86,25 +86,44 @@ c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
   stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
   printf("%d, ", stopTm1);
 #endif
-
+  
+  uint8_t modno = stack[module[len].stack_id].modno ;
+  uint8_t stack_id = module->stack_id;
+  PRINTF("stack_id: %d\n",stack_id);   
+   
   if(module[len].c_recv == NULL)
     return;
-  uint8_t modno = stack[module[len].stack_id].modno;
+ 
 
 #if EVAL
   startTm2 = vsnTime_freeRunTime();
 #endif
+  
   module[len].c_recv(p, &module[len]);
+  
 #if EVAL
   stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
   printf("%d, ", stopTm1);
 
   startTm2 = vsnTime_freeRunTime();
 #endif
+  
   len++;
   if((len >= 0) && (len < modno)) {
     c_recv(p, module, len);
   }
+  
+  if (module[len-1].parent  != NULL) {
+    stack[stack_id].merged_flg = 1;
+    uint8_t parent_stack_id = module[len-1].parent->stack_id;
+    uint8_t parent_module_id = module[len-1].parent->module_id;
+    PRINTF("parent_stack_id: %d \n", parent_stack_id);
+    PRINTF("parent_module_id: %d \n", parent_module_id);
+    //c_recv(p, module[len-1].parent, module[len-1].parent->module_id);
+    c_recv(p, stack[parent_stack_id].amodule, parent_module_id);
+    //stack[parent_stack_id].amodule[parent_module_id].c_recv(p, module[len-1].parent);
+  }
+
 #if EVAL
   stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
   printf("%d\n ", stopTm1);
