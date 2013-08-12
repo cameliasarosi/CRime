@@ -99,6 +99,34 @@ int
 c_echo_app_send(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("~c_echo_app_send\n");
+
+ /* rimeaddr_t esender, ereceiver, addr;
+
+    if(stack[module->stack_id].resend_flg == 1) {
+  	  rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+  	  rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+   	  packetbuf_clear;
+   	  packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &ereceiver);
+   	  packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &esender);
+   	  //packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &esender);
+   	  addr.u8[0]=rimeaddr_node_addr.u8[0];
+   	  addr.u8[1]=rimeaddr_node_addr.u8[1];
+   	  packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &addr);
+
+   	  rimeaddr_t new_esender, new_ereceiver;
+
+   	  rimeaddr_copy(&new_esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+   	  PRINTF("new_esender: %d.%d \n", new_esender.u8[0], new_esender.u8[1]);
+   	  rimeaddr_copy(&new_ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+   	 PRINTF("new_ereceiver: %d.%d \n", new_ereceiver.u8[0], new_ereceiver.u8[1]);
+   	  set_node_addr(module->stack_id, 0, 1, &new_esender);
+   	  //set_node_addr(module->stack_id, 0, 2, &new_ereceiver);
+   	  set_node_addr(module->stack_id, 0, 3, &new_ereceiver);
+   	  set_node_addr(module->stack_id, 1, 1, &new_esender);
+   	  //set_node_addr(module->stack_id, 1, 2, &new_ereceiver);
+   	  set_node_addr(module->stack_id, 1, 3, &new_ereceiver);
+    }*/
+
   printf("----------- sending %s \n", (char *)packetbuf_dataptr());
   return 1;
 }
@@ -108,7 +136,49 @@ void
 c_echo_app_recv(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("c_echo_app_recv\n");
-  printf("----------- received %s \n", (char *)packetbuf_dataptr());
+  printaddr(module->stack_id);
+  //printf("----------- received %s \n", (char *)packetbuf_dataptr());
+
+  rimeaddr_t esender, ereceiver, addr;
+
+  /* Copy the packet attributes to avoid them being overwritten or
+   cleared by an application program that uses the packet buffer for
+   its own needs. */
+  rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+  rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+  set_node_addr(module->stack_id, 1, 1, &esender);
+  set_node_addr(module->stack_id, 1, 3, &ereceiver);
+
+  printf("Data received from %d.%d: %.*s (%d)\n",
+		  esender.u8[0], esender.u8[1],
+		  packetbuf_datalen(), (char *)packetbuf_dataptr(), packetbuf_datalen());
+
+  if(stack[module->stack_id].resend_flg == 1) {
+	  resetaddr(module->stack_id);
+	  packetbuf_clear;
+	  packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &ereceiver);
+	  packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &esender);
+	  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &esender);
+	  addr.u8[0]=rimeaddr_node_addr.u8[0];
+	  addr.u8[1]=rimeaddr_node_addr.u8[1];
+	  packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &addr);
+
+	  rimeaddr_t new_esender, new_ereceiver;
+
+	  rimeaddr_copy(&new_esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+	  PRINTF("new_esender: %d.%d \n", new_esender.u8[0], new_esender.u8[1]);
+	  rimeaddr_copy(&new_ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+	  PRINTF("new_ereceiver: %d.%d \n", new_ereceiver.u8[0], new_ereceiver.u8[1]);
+	  set_node_addr(module->stack_id, 0, 0, &addr);
+	  set_node_addr(module->stack_id, 0, 1, &new_esender);
+	 // set_node_addr(module->stack_id, 0, 2, &new_ereceiver);
+	  set_node_addr(module->stack_id, 0, 3, &new_ereceiver);
+	  //set_node_addr(module->stack_id, 1, 1, &new_esender);
+	  //set_node_addr(module->stack_id, 1, 2, &new_ereceiver);
+	  set_node_addr(module->stack_id, 1, 3, &new_ereceiver);
+	  printaddr(module->stack_id);
+	  stack_send(stack, stack[module->stack_id].modno - 1);
+  }
 }
 
 void

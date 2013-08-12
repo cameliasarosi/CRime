@@ -123,7 +123,6 @@ static void found_route(struct pipe *p, struct stackmodule_i *module) {
       if (rt != NULL) {
         //c_send(stack[module->stack_id].pip, stack[module->stack_id].amodule, module->module_id - 2);
     	set_node_addr(module->stack_id, 0, 2, &rt->nexthop);
-        stack[module->stack_id].resend_flg = 1;
         stack_send(&stack[module->stack_id], module->module_id - 2);
       } else {
         c_timed_out(stack[module->stack_id].pip, stack[module->stack_id].amodule, 

@@ -155,11 +155,13 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 	rimeaddr_copy(&receiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
 	set_node_addr(module->stack_id, 1, 1, &sender);
 	set_node_addr(module->stack_id, 1, 3, &receiver);
+
 	//rimeaddr_copy(&p->in_esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
 	//rimeaddr_copy(&p->in_ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
 
 	if (rimeaddr_cmp(packetbuf_addr(PACKETBUF_ADDR_ERECEIVER),
 			&rimeaddr_node_addr)) {
+		stack[module->stack_id].resend_flg = 1;
 		PRINTF("for us!\n");
 		p->multihop_param.hop_no = packetbuf_attr(PACKETBUF_ATTR_HOPS);
 	} else {

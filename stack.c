@@ -60,6 +60,46 @@ printaddr(int stack_id)
 }
 
 void
+resetaddr(int stack_id)
+{
+	rimeaddr_t *addr;
+	addr->u8[0] = 0; addr->u8[1] = 0;
+	set_node_addr(stack->amodule->stack_id, OUT, 0, addr);
+	set_node_addr(stack->amodule->stack_id, OUT, 1, addr);
+	set_node_addr(stack->amodule->stack_id, OUT, 2, addr);
+	set_node_addr(stack->amodule->stack_id, OUT, 3, addr);
+
+	rimeaddr_t *sender = get_node_addr(stack_id, OUT, 0);
+	rimeaddr_t *esender = get_node_addr(stack_id, OUT, 1);
+	rimeaddr_t *receiver = get_node_addr(stack_id, OUT, 2);
+	rimeaddr_t *ereceiver = get_node_addr(stack_id, OUT, 3);
+
+	PRINTF("out: s%d.%d es%d.%d r%d.%d er%d.%d\n",
+         sender->u8[0], sender->u8[1],
+         esender->u8[0], esender->u8[1],
+         receiver->u8[0], receiver->u8[1],
+         ereceiver->u8[0], ereceiver->u8[1]);
+
+	set_node_addr(stack->amodule->stack_id, IN, 0, addr);
+	set_node_addr(stack->amodule->stack_id, IN, 1, addr);
+	set_node_addr(stack->amodule->stack_id, IN, 2, addr);
+	set_node_addr(stack->amodule->stack_id, IN, 3, addr);
+
+	sender = get_node_addr(stack_id, IN, 0);
+	esender = get_node_addr(stack_id, IN, 1);
+	receiver = get_node_addr(stack_id, IN, 2);
+	ereceiver = get_node_addr(stack_id, IN, 3);
+
+  	PRINTF("in: s%d.%d es%d.%d r%d.%d er%d.%d\n",
+         sender->u8[0], sender->u8[1],
+         esender->u8[0], esender->u8[1],
+         receiver->u8[0], receiver->u8[1],
+         ereceiver->u8[0], ereceiver->u8[1]);
+}
+
+
+
+void
 stack_init()
 {
   PRINTF("stack init\n");
@@ -144,9 +184,9 @@ stack_init()
   addr.u8[0]=3;addr.u8[1]=0;
   //addr.u8[0] = 1; addr.u8[1] = 0;  
   set_node_addr(0, OUT, ERECEIVER, &addr);
-  addr.u8[0]=rimeaddr_node_addr.u8[0];
-  addr.u8[1]=rimeaddr_node_addr.u8[1];
-  //addr.u8[0] = 2; addr.u8[1] = 0; 
+  //addr.u8[0]=rimeaddr_node_addr.u8[0];
+  //addr.u8[1]=rimeaddr_node_addr.u8[1];
+  addr.u8[0] = 1; addr.u8[1] = 0;
   set_node_addr(0, OUT, ESENDER, &addr);
   amodule0[3].c_open = c_multihop_open;
   amodule0[3].c_close = c_multihop_close;
@@ -444,10 +484,10 @@ stack_recv(struct stackmodule_i *module)
   if(stack[stack_id].not_dest_flg == 1) {
     return;
   }
-  
-  if(stack[module->stack_id].resend_flg == 1) {
-    return;
-  }
+
+ // if(stack[module->stack_id].resend_flg == 1) {
+   // return;
+  //}
   
   int modno = stack[stack_id].modno - 1;
   
