@@ -66,14 +66,21 @@ stack_init()
   //init the stacks structure (columns of the matrix, branches of the tree)
   stack = (struct stack_i *)calloc(STACKNO, sizeof(struct stack_i));
   rimeaddr_t addr;
-
+  
+  
   //@defStack
   struct pipe *pi0; 
   pi0 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch0; 
-  ch0 = (struct channel*) calloc(1, sizeof(struct channel)); 
+  ch0 = (struct channel*) calloc(1, sizeof(struct channel));
+ /* struct mesh_p *msh_p;
+  msh_p = (struct mesh_p*) calloc(1, sizeof(struct mesh_p));
+  struct multihop_p *mhop_p;
+  mhop_p = (struct multihop_p*) calloc(1, sizeof(struct multihop_p));*/
   stack[0].pip = pi0; 
   stack[0].pip->channel = ch0; 
+  //stack[0].pip->mesh_param = msh_p; 
+  //stack[0].pip->multihop_param = mhop_p; 
   stack[0].modno = 6; 
   struct stackmodule_i *amodule0; 
   amodule0 = (struct stackmodule_i*) calloc( 
@@ -122,7 +129,7 @@ stack_init()
   amodule0[2].parent = NULL;
   amodule0[2].time_trigger_flg = 0;
   addr.u8[0] = 3; addr.u8[1] = 0;
-  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER,&addr);
+  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &addr);
   set_node_addr(0, OUT, RECEIVER, &addr);
   amodule0[2].c_open = c_unicast_open;
   amodule0[2].c_close = c_unicast_close;
@@ -146,6 +153,7 @@ stack_init()
   amodule0[3].c_send = c_multihop_send;
   amodule0[3].c_sent = c_multihop_sent;
   amodule0[3].c_recv = c_multihop_recv;
+  //rimeaddr_copy(amodule0[3].c_forward, c_multihop_forward);
   amodule0[3].c_forward = c_multihop_forward;
 
   amodule0[4].stack_id = 0; 
@@ -158,6 +166,7 @@ stack_init()
   amodule0[4].c_sent = c_mesh_sent;
   amodule0[4].c_recv = c_mesh_recv;
   amodule0[4].c_forward = c_mesh_forward;
+  //rimeaddr_copy(amodule0[4].c_forward, c_mesh_forward);
   amodule0[4].c_timed_out = c_mesh_timedout;
 
   amodule0[5].stack_id = 0; 
@@ -169,15 +178,27 @@ stack_init()
   amodule0[5].c_send = c_echo_app_send;
   amodule0[5].c_recv = c_echo_app_recv;
   amodule0[5].c_sent = c_echo_app_sent;
-  amodule0[5].c_forward = c_echo_app_forward;
+  rimeaddr_copy(amodule0[5].c_forward, c_echo_app_forward);
+  //amodule0[5].c_forward = c_echo_app_forward;
   amodule0[5].c_timed_out = c_echo_app_timedout;
+
+  
 
   struct pipe *pi1; 
   pi1 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch1; 
-  ch1 = (struct channel*) calloc(1, sizeof(struct channel)); 
+  ch1 = (struct channel*) calloc(1, sizeof(struct channel));
+  /*struct polite_p *poli_p;
+  poli_p = (struct polite_p*) calloc(1, sizeof(struct polite_p));
+  struct netflood_p *netfl_p;
+  netfl_p = (struct netflood_p*) calloc(1, sizeof(struct netflood_p));
+  struct route_discovery_p *route_discov_p;
+  route_discov_p = (struct route_discovery_p*) calloc(1, sizeof(struct route_discovery_p));*/
   stack[1].pip = pi1; 
-  stack[1].pip->channel = ch1; 
+  stack[1].pip->channel = ch1;
+  /*stack[1].pip->polite_param = poli_p;
+  stack[1].pip->netflood_param = netfl_p;
+  stack[1].pip->route_discovery_param = route_discov_p;*/
   stack[1].modno = 5; 
   struct stackmodule_i *amodule1; 
   amodule1 = (struct stackmodule_i*) calloc( 
@@ -419,26 +440,30 @@ stack_recv(struct stackmodule_i *module)
   PRINTF("stack_id: %d\n",module->stack_id);
   uint8_t stack_id = module->stack_id;
   uint8_t mod_id = module->module_id;
-
-  if(stack[stack_id].not_dest_flag == 1) {
+  
+  if(stack[stack_id].not_dest_flg == 1) {
     return;
   }
-
+  
+  if(stack[module->stack_id].resend_flg == 1) {
+    return;
+  }
+  
   int modno = stack[stack_id].modno - 1;
-
+  
   if(mod_id <= modno) {
     if(stack[stack_id].amodule[modno].c_recv != NULL) {
       c_recv(stack[stack_id].pip, stack[stack_id].amodule, mod_id);
     }
   }
 
-  if(module->module_id == 0 && stack[module->stack_id].not_dest_flag == 1) {
-    stack[stack_id].not_dest_flag=0; 
+  if(module->module_id == 0 && stack[module->stack_id].not_dest_flg == 1) {
+    stack[stack_id].not_dest_flg = 0; 
     return;
   }
 
   if(stack[stack_id].amodule[modno].parent != NULL) {
-    stack[stack_id].merged_flg=1;
+    stack[stack_id].merged_flg = 1;
     uint8_t parent_stack_id = stack[stack_id].amodule[modno].parent->stack_id;
     uint8_t parent_mod_id = stack[stack_id].amodule[modno].parent->module_id;
     stack_recv(&stack[parent_stack_id].amodule[parent_mod_id]);

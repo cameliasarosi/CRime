@@ -30,8 +30,9 @@ struct stack_i {
   uint8_t modno;
   uint8_t time_trigger_flg;
   uint8_t merged_flg;
-  uint8_t not_dest_flag;
-  uint8_t rrep_received_flag;
+  uint8_t not_dest_flg;
+  uint8_t rrep_received_flg;
+  uint8_t resend_flg;
 };
 
 struct stack_i *stack;

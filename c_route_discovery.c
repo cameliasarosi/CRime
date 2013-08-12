@@ -169,7 +169,7 @@ static void send_rrep(struct pipe *p, struct stackmodule_i *module)
     //unicast_send(&c->rrepconn, &rt->nexthop);
     module->stack_id = RREP_STACK_ID;
     c_send(stack[RREP_STACK_ID].pip, stack[RREP_STACK_ID].amodule,
-           stack[RREP_STACK_ID].modno - 2);
+           stack[RREP_STACK_ID].modno - 1);
 
     //stack_send(stack[RREP_STACK_ID].pip,stack[RREP_STACK_ID].modno);		
   } else {
@@ -222,7 +222,7 @@ static void rrep_packet_received(struct pipe *p, struct stackmodule_i *module)
   if(rimeaddr_cmp(&msg->dest, &rimeaddr_node_addr)) {
     PRINTF("rrep for us!\n");
     rrep_pending = 0;
-    stack[module->stack_id].rrep_received_flag = 1;
+    stack[module->stack_id].rrep_received_flg = 1;
     ctimer_stop(&p->route_discovery_param.timer);
     //c_send(stack[MAIN_STACK_ID].pip, stack[MAIN_STACK_ID].amodule,
     //stack[MAIN_STACK_ID].modno - 4);
@@ -239,7 +239,7 @@ static void rrep_packet_received(struct pipe *p, struct stackmodule_i *module)
       set_node_addr(module->stack_id + 1, 0, 2, &rt->nexthop);
       set_node_addr(module->stack_id + 1, 0, 3, &dest);
       c_send(stack[RREP_STACK_ID].pip, stack[RREP_STACK_ID].amodule,
-             stack[RREP_STACK_ID].modno - 2);
+             stack[RREP_STACK_ID].modno - 1);
     } else {
       PRINTF(
           "%d.%d: no route to %d.%d\n", rimeaddr_node_addr.u8[0], 
@@ -356,7 +356,7 @@ void c_route_discovery_recv(struct pipe *p, struct stackmodule_i *module)
   PRINTF("c_route_discovery_recv\n");
   
   if(stack[RREP_STACK_ID].merged_flg) {
-    //stack[RREP_STACK_ID].merged_flg = 0;
+    stack[RREP_STACK_ID].merged_flg = 0;
     rrep_packet_received(stack[RREQ_STACK_ID].pip,
                          stack[RREQ_STACK_ID].amodule);
   } else {

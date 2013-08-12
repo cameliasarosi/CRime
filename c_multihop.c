@@ -108,8 +108,15 @@ int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("c_multihop_send \n");
 	//printaddr(module->stack_id);
 	packetbuf_compact();
-	rimeaddr_t *nexthop = (rimeaddr_t *) c_forward(stack[module->stack_id].pip,
+	rimeaddr_t *nexthop;
+	nexthop = c_forward(stack[module->stack_id].pip,
 			stack[module->stack_id].amodule, module->module_id);
+
+	/*uint8_t module_id = stack[module->stack_id].amodule->module_id;
+	nexthop = module[module_id].c_forward(stack[module->stack_id].pip,
+			stack[module->stack_id].amodule);*/
+	//rimeaddr_copy(nexthop, c_forward(stack[module->stack_id].pip,
+			//stack[module->stack_id].amodule, module->module_id));
 	if (nexthop == NULL) {
 		PRINTF("multihop_send: no route\n");
 		return 0;
@@ -156,7 +163,8 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 		PRINTF("for us!\n");
 		p->multihop_param.hop_no = packetbuf_attr(PACKETBUF_ATTR_HOPS);
 	} else {
-		nexthop = c_forward(p, module, stack[module->stack_id].modno);
+		nexthop = c_forward(p, stack[module->stack_id].amodule, stack[module->stack_id].modno);
+		PRINTF("nexthop: %d.%d \n", nexthop->u8[0], nexthop->u8[1]);
 
 		packetbuf_set_attr(PACKETBUF_ATTR_HOPS,
 				packetbuf_attr(PACKETBUF_ATTR_HOPS) + 1);
@@ -164,7 +172,9 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 			set_node_addr(module->stack_id, 0, 2, nexthop);
 			PRINTF("forwarding to %d.%d\n", nexthop->u8[0], nexthop->u8[1]);
 			if (module->stack_id < STACKNO) {
+				//stack_send(&stack[module->stack_id], module->module_id);
 				stack_send(&stack[module->stack_id], module->module_id);
+
 			}
 		}
 	}
@@ -173,7 +183,16 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 rimeaddr_t *
 c_multihop_forward(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("multihop forward \n");
-	return NULL;
+	struct route_entry *rt;
+	rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
+
+	rt = route_lookup(tmpaddr);
+	if (rt == NULL) {
+		return NULL;
+	} else {
+		route_refresh(rt);
+	} PRINTF("~c_multihop_forward \n");
+	return &rt->nexthop;
 }
 
 void c_multihop_sent(struct pipe *p, struct stackmodule_i *module) {

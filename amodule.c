@@ -88,12 +88,19 @@ c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 #endif
   
   uint8_t modno = stack[module[len].stack_id].modno ;
-  uint8_t stack_id = module->stack_id;
-  PRINTF("stack_id: %d\n",stack_id);   
+  //uint8_t stack_id = module->stack_id;
+  //PRINTF("stack_id: %d\n", stack_id);   
    
   if(module[len].c_recv == NULL)
     return;
- 
+  
+  if(stack[MAIN_STACK_ID].resend_flg == 1) {
+      return;
+     }
+  
+  if(stack[MAIN_STACK_ID].resend_flg != 1 && len == 5) {
+    return;
+   }
 
 #if EVAL
   startTm2 = vsnTime_freeRunTime();
@@ -113,16 +120,15 @@ c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
     c_recv(p, module, len);
   }
   
-  if (module[len-1].parent  != NULL) {
+ /* if(module[len-1].parent  != NULL) {
     stack[stack_id].merged_flg = 1;
     uint8_t parent_stack_id = module[len-1].parent->stack_id;
     uint8_t parent_module_id = module[len-1].parent->module_id;
     PRINTF("parent_stack_id: %d \n", parent_stack_id);
     PRINTF("parent_module_id: %d \n", parent_module_id);
     //c_recv(p, module[len-1].parent, module[len-1].parent->module_id);
-    c_recv(p, stack[parent_stack_id].amodule, parent_module_id);
-    //stack[parent_stack_id].amodule[parent_module_id].c_recv(p, module[len-1].parent);
-  }
+    c_recv(p, stack[parent_stack_id].amodule, parent_module_id);  
+  }*/
 
 #if EVAL
   stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
@@ -259,15 +265,15 @@ c_forward(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 {
   PRINTF("c_forward \n");
   rimeaddr_t *tmpaddr;
-
-  for(;;) {
+  for(len;len > 0; len--) {
+	PRINTF("len: %d \n", len);
     if((len >= 0) && (len < 255) && (module[len].c_forward != NULL)) {
       tmpaddr = module[len].c_forward(p, &module[len]);
-      PRINTF("%d%d %d %d %d\n", tmpaddr->u8[0], tmpaddr->u8[1], len,
+      PRINTF("%d.%d %d %d %d\n", tmpaddr->u8[0], tmpaddr->u8[1], len,
              module[len].module_id, module[len].stack_id);
       return tmpaddr;
     }
-    len--;
+    //len--;
   }
   PRINTF("~c_forward %d\n", len);
   return NULL;

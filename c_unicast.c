@@ -109,6 +109,7 @@ c_unicast_send(struct pipe *p, struct stackmodule_i *module)
   //rimeaddr_t tmpaddr1;
   rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 2);
   packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, tmpaddr);
+  PRINTF("c_unicast_send to %d.%d \n", tmpaddr->u8[0], tmpaddr->u8[1]);
   printaddr(module->stack_id);
   return 1;
 }

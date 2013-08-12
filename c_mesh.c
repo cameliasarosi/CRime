@@ -108,17 +108,23 @@ c_mesh_forward(struct pipe *p, struct stackmodule_i *module) {
 static void found_route(struct pipe *p, struct stackmodule_i *module) {
   struct route_entry *rt;
   rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
-  
   PRINTF("found route \n");
-  if(p->mesh_param.queued_data != NULL && 
+  
+  PRINTF("dest address: %d.%d \n", tmpaddr->u8[0], tmpaddr->u8[1]);
+  PRINTF("queued data dest: %d.%d \n", p->mesh_param.queued_data_dest.u8[0], 
+         p->mesh_param.queued_data_dest.u8[1]);
+  
+  if (p->mesh_param.queued_data != NULL && 
       rimeaddr_cmp (tmpaddr, &p->mesh_param.queued_data_dest )) {
-    queuebuf_to_packetbuf (p->mesh_param.queued_data);
-    queuebuf_free (p->mesh_param.queued_data);
+    queuebuf_to_packetbuf(p->mesh_param.queued_data);
+    queuebuf_free(p->mesh_param.queued_data);
     p->mesh_param.queued_data= NULL;
     rt = route_lookup(tmpaddr);
       if (rt != NULL) {
-        c_send(stack[module->stack_id].pip, stack[module->stack_id].amodule, module->module_id - 2);
-        //stack_send(&stack[module->stack_id], module->module_id - 2);
+        //c_send(stack[module->stack_id].pip, stack[module->stack_id].amodule, module->module_id - 2);
+    	set_node_addr(module->stack_id, 0, 2, &rt->nexthop);
+        stack[module->stack_id].resend_flg = 1;
+        stack_send(&stack[module->stack_id], module->module_id - 2);
       } else {
         c_timed_out(stack[module->stack_id].pip, stack[module->stack_id].amodule, 
                     module->module_id);
@@ -168,7 +174,7 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 		p->mesh_param.queued_data = queuebuf_new_from_packetbuf();
 		tmpaddr = get_node_addr(module->stack_id, 0, 3);
 		rimeaddr_copy(&p->mesh_param.queued_data_dest, tmpaddr);
-
+	
 		int module_id = stack[RREQ_STACK_ID].modno;
 
 		set_node_addr(module->stack_id + 1, 0, 0,
@@ -189,7 +195,7 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 
 /*---------------------------------------------------------------------------*/
 void c_mesh_recv(struct pipe *p, struct stackmodule_i *module) {
-	PRINTF("c_mesh_recv\n");
+  PRINTF("c_mesh_recv\n");
 	/*PRINTF("Data received from %d.%d: %.*s (%d)\n",
 	 p->esender.u8[0], p->esender.u8[1],
 	 packetbuf_datalen(), (char *)packetbuf_dataptr(), packetbuf_datalen()); */
@@ -203,8 +209,8 @@ void c_mesh_recv(struct pipe *p, struct stackmodule_i *module) {
 		route_refresh(rt);
 	}
 	
-	if (stack[RREQ_STACK_ID].rrep_received_flag == 1) {
-	  stack[RREQ_STACK_ID].rrep_received_flag = 0;
+	if (stack[RREQ_STACK_ID].rrep_received_flg == 1) {
+	  stack[RREQ_STACK_ID].rrep_received_flg = 0;
 	  found_route(p, module);
 	}
 }

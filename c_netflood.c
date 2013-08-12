@@ -119,7 +119,7 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
 
   if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
       && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
-    stack[module->stack_id].not_dest_flag=1;
+    stack[module->stack_id].not_dest_flg=1;
   }
 
   if (p->netflood_param.queuebuf != NULL) {
@@ -153,9 +153,9 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
   if (p->netflood_param.doFlood == 1) {
     if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
         && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
-      stack[module->stack_id].not_dest_flag = 1;
+      stack[module->stack_id].not_dest_flg = 1;
     }	
-    if(stack[module->stack_id].not_dest_flag != 1) {
+    if(stack[module->stack_id].not_dest_flg != 1) {
 
       if (p->netflood_param.queuebuf != NULL) {
         queuebuf_to_packetbuf(p->netflood_param.queuebuf);
