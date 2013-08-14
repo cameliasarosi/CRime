@@ -60,54 +60,13 @@ printaddr(int stack_id)
 }
 
 void
-resetaddr(int stack_id)
-{
-	rimeaddr_t *addr;
-	addr->u8[0] = 0; addr->u8[1] = 0;
-	set_node_addr(stack->amodule->stack_id, OUT, 0, addr);
-	set_node_addr(stack->amodule->stack_id, OUT, 1, addr);
-	set_node_addr(stack->amodule->stack_id, OUT, 2, addr);
-	set_node_addr(stack->amodule->stack_id, OUT, 3, addr);
-
-	rimeaddr_t *sender = get_node_addr(stack_id, OUT, 0);
-	rimeaddr_t *esender = get_node_addr(stack_id, OUT, 1);
-	rimeaddr_t *receiver = get_node_addr(stack_id, OUT, 2);
-	rimeaddr_t *ereceiver = get_node_addr(stack_id, OUT, 3);
-
-	PRINTF("out: s%d.%d es%d.%d r%d.%d er%d.%d\n",
-         sender->u8[0], sender->u8[1],
-         esender->u8[0], esender->u8[1],
-         receiver->u8[0], receiver->u8[1],
-         ereceiver->u8[0], ereceiver->u8[1]);
-
-	set_node_addr(stack->amodule->stack_id, IN, 0, addr);
-	set_node_addr(stack->amodule->stack_id, IN, 1, addr);
-	set_node_addr(stack->amodule->stack_id, IN, 2, addr);
-	set_node_addr(stack->amodule->stack_id, IN, 3, addr);
-
-	sender = get_node_addr(stack_id, IN, 0);
-	esender = get_node_addr(stack_id, IN, 1);
-	receiver = get_node_addr(stack_id, IN, 2);
-	ereceiver = get_node_addr(stack_id, IN, 3);
-
-  	PRINTF("in: s%d.%d es%d.%d r%d.%d er%d.%d\n",
-         sender->u8[0], sender->u8[1],
-         esender->u8[0], esender->u8[1],
-         receiver->u8[0], receiver->u8[1],
-         ereceiver->u8[0], ereceiver->u8[1]);
-}
-
-
-
-void
 stack_init()
 {
   PRINTF("stack init\n");
   //init the stacks structure (columns of the matrix, branches of the tree)
   stack = (struct stack_i *)calloc(STACKNO, sizeof(struct stack_i));
   rimeaddr_t addr;
-  
-  
+
   //@defStack
   struct pipe *pi0; 
   pi0 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
@@ -169,7 +128,6 @@ stack_init()
   amodule0[2].parent = NULL;
   amodule0[2].time_trigger_flg = 0;
   addr.u8[0] = 3; addr.u8[1] = 0;
-  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &addr);
   set_node_addr(0, OUT, RECEIVER, &addr);
   amodule0[2].c_open = c_unicast_open;
   amodule0[2].c_close = c_unicast_close;
@@ -182,10 +140,7 @@ stack_init()
   amodule0[3].parent = NULL;
   amodule0[3].time_trigger_flg = 0;
   addr.u8[0]=3;addr.u8[1]=0;
-  //addr.u8[0] = 1; addr.u8[1] = 0;  
   set_node_addr(0, OUT, ERECEIVER, &addr);
-  //addr.u8[0]=rimeaddr_node_addr.u8[0];
-  //addr.u8[1]=rimeaddr_node_addr.u8[1];
   addr.u8[0] = 1; addr.u8[1] = 0;
   set_node_addr(0, OUT, ESENDER, &addr);
   amodule0[3].c_open = c_multihop_open;
@@ -221,9 +176,7 @@ stack_init()
   rimeaddr_copy(amodule0[5].c_forward, c_echo_app_forward);
   //amodule0[5].c_forward = c_echo_app_forward;
   amodule0[5].c_timed_out = c_echo_app_timedout;
-
   
-
   struct pipe *pi1; 
   pi1 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch1; 
@@ -375,7 +328,6 @@ stack_init()
   amodule2[2].c_send = c_unicast_send;
   amodule2[2].c_sent = c_unicast_sent;
   amodule2[2].c_recv = c_unicast_recv;
-
 }
 
 void
@@ -420,6 +372,7 @@ stack_send(struct stack_i *stack, uint8_t module_id)
   int sent_flag = 0;
 
   for(p = 0; p < STACKNO; p++) {
+
     int modno;
 
     if(module_id == -1) {

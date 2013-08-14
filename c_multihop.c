@@ -112,11 +112,6 @@ int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 	nexthop = c_forward(stack[module->stack_id].pip,
 			stack[module->stack_id].amodule, module->module_id);
 
-	/*uint8_t module_id = stack[module->stack_id].amodule->module_id;
-	nexthop = module[module_id].c_forward(stack[module->stack_id].pip,
-			stack[module->stack_id].amodule);*/
-	//rimeaddr_copy(nexthop, c_forward(stack[module->stack_id].pip,
-			//stack[module->stack_id].amodule, module->module_id));
 	if (nexthop == NULL) {
 		PRINTF("multihop_send: no route\n");
 		return 0;
@@ -193,7 +188,8 @@ c_multihop_forward(struct pipe *p, struct stackmodule_i *module) {
 		return NULL;
 	} else {
 		route_refresh(rt);
-	} PRINTF("~c_multihop_forward \n");
+	}
+	PRINTF("~c_multihop_forward \n");
 	return &rt->nexthop;
 }
 
