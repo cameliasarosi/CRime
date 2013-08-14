@@ -87,6 +87,7 @@
 rimeaddr_t *
 c_mesh_forward(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("c_mesh_forward \n");
+	//p->mesh_param.mesh_forward_flg = 1;
 	struct route_entry *rt;
 	rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
 

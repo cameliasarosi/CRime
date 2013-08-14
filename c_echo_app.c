@@ -126,31 +126,15 @@ c_echo_app_recv(struct pipe *p, struct stackmodule_i *module)
 	  packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &ereceiver);
 	  packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &esender);
 	  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &esender);
+	  addr.u8[0]=rimeaddr_node_addr.u8[0];
+	  addr.u8[1]=rimeaddr_node_addr.u8[1];
+	  set_node_addr(module->stack_id, 0, 0, &addr);
 	  set_node_addr(module->stack_id, 0, 1, &ereceiver);
 	  set_node_addr(module->stack_id, 0, 2, &esender);
 	  set_node_addr(module->stack_id, 0, 3, &esender);
-	  /*packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &ereceiver);
-	  packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &esender);
-	  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &esender);
-	  addr.u8[0]=rimeaddr_node_addr.u8[0];
-	  addr.u8[1]=rimeaddr_node_addr.u8[1];
-	  packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &addr);
-
-	  rimeaddr_t new_esender, new_ereceiver;
-
-	  rimeaddr_copy(&new_esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
-	  PRINTF("new_esender: %d.%d \n", new_esender.u8[0], new_esender.u8[1]);
-	  rimeaddr_copy(&new_ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
-	  PRINTF("new_ereceiver: %d.%d \n", new_ereceiver.u8[0], new_ereceiver.u8[1]);
-
-	  set_node_addr(module->stack_id, 0, 0, &addr);
-	  set_node_addr(module->stack_id, 0, 1, &new_esender);
-	  //set_node_addr(module->stack_id, 0, 2, &new_ereceiver);
-	  set_node_addr(module->stack_id, 0, 3, &new_ereceiver);
-	  //set_node_addr(module->stack_id, 1, 1, &new_esender);
-	  //set_node_addr(module->stack_id, 1, 2, &new_ereceiver);
-	  set_node_addr(module->stack_id, 1, 3, &new_ereceiver);*/
-	  printaddr(module->stack_id);
+	  set_node_addr(module->stack_id, 1, 1, &ereceiver);
+	  set_node_addr(module->stack_id, 1, 2, &esender);
+	  set_node_addr(module->stack_id, 1, 3, &esender);
 	  stack_send(stack, stack[module->stack_id].modno - 1);
   }
 }

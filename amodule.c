@@ -171,28 +171,6 @@ int
 c_send(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 {
   PRINTF("c_send %d\n", len);
-  /*if (len == 5) {
-    	  rimeaddr_t sender, esender, receiver, ereceiver;
-    	  						rimeaddr_copy(&sender, get_node_addr(module->stack_id, OUT, 0));
-    	  						rimeaddr_copy(&esender, get_node_addr(module->stack_id, OUT, 1));
-    	  						rimeaddr_copy(&receiver, get_node_addr(module->stack_id, OUT, 2));
-    	  						rimeaddr_copy(&ereceiver, get_node_addr(module->stack_id, OUT, 3));
-
-    	  						//PRINTF("esender: %d.%d \n", esender->u8[0], esender->u8[1]);
-    	  						//PRINTF("ereceiver: %d.%d \n", receiver->u8[0], ereceiver->u8[1]);
-
-    	  						packetbuf_clear;
-    	  						packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &sender);
-    	  						packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &esender);
-    	  						packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &receiver);
-    	  						packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &ereceiver);
-
-    	  						rimeaddr_t new_esender, new_ereceiver;
-    	  						rimeaddr_copy(&new_esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
-    	  						PRINTF("new_esender: %d.%d \n", new_esender.u8[0], new_esender.u8[1]);
-    	  						rimeaddr_copy(&new_ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
-    	  						PRINTF("new_ereceiver: %d.%d \n", new_ereceiver.u8[0], new_ereceiver.u8[1]);
-      }*/
   int send_flg = module[len].c_send(p, &module[len]);
   len--;
   if((len >= 0) && (len < 255) && (send_flg)) {

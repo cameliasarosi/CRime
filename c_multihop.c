@@ -109,9 +109,11 @@ int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 	//printaddr(module->stack_id);
 	packetbuf_compact();
 	rimeaddr_t *nexthop;
+
+	rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
+
 	nexthop = c_forward(stack[module->stack_id].pip,
 			stack[module->stack_id].amodule, module->module_id);
-
 	if (nexthop == NULL) {
 		PRINTF("multihop_send: no route\n");
 		return 0;
@@ -120,13 +122,19 @@ int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 		PRINTF("multihop_send: sending data towards %d.%d\n",
 				nexthop->u8[0], nexthop->u8[1]);
 
-		//rimeaddr_copy(&p->receiver, nexthop);
-		set_node_addr(module->stack_id, 0, 2, nexthop);
-		rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
-
 		packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, tmpaddr);
-		tmpaddr = get_node_addr(module->stack_id, 0, 1);
-		packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, tmpaddr);
+		rimeaddr_t *tmpaddr1 = get_node_addr(module->stack_id, 0, 1);
+		packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, tmpaddr1);
+
+		rimeaddr_t  esender, ereceiver;
+		rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+		rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+
+		PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+		PRINTF("ereceiver: %d.%d \n", ereceiver.u8[0], ereceiver.u8[1]);
+
+		//rimeaddr_copy(&p->receiver, nexthop);
+		//set_node_addr(module->stack_id, 0, 2, nexthop);
 		packetbuf_set_attr(PACKETBUF_ATTR_HOPS, 1);
 		return 1;
 	}
@@ -141,15 +149,19 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 
 	rimeaddr_t *nexthop = NULL;
 
-	rimeaddr_t sender, receiver;
+	rimeaddr_t esender, ereceiver;
 
 	/* Copy the packet attributes to avoid them being overwritten or
 	 cleared by an application program that uses the packet buffer for
 	 its own needs. */
-	rimeaddr_copy(&sender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
-	rimeaddr_copy(&receiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
-	set_node_addr(module->stack_id, 1, 1, &sender);
-	set_node_addr(module->stack_id, 1, 3, &receiver);
+	rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+	rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+	set_node_addr(module->stack_id, 1, 1, &esender);
+	set_node_addr(module->stack_id, 1, 3, &ereceiver);
+
+	PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+	PRINTF("ereceiver: %d.%d \n", ereceiver.u8[0], ereceiver.u8[1]);
+
 
 	//rimeaddr_copy(&p->in_esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
 	//rimeaddr_copy(&p->in_ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
@@ -182,7 +194,6 @@ c_multihop_forward(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("multihop forward \n");
 	struct route_entry *rt;
 	rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
-
 	rt = route_lookup(tmpaddr);
 	if (rt == NULL) {
 		return NULL;

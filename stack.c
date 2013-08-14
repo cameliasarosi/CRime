@@ -72,14 +72,8 @@ stack_init()
   pi0 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch0; 
   ch0 = (struct channel*) calloc(1, sizeof(struct channel));
- /* struct mesh_p *msh_p;
-  msh_p = (struct mesh_p*) calloc(1, sizeof(struct mesh_p));
-  struct multihop_p *mhop_p;
-  mhop_p = (struct multihop_p*) calloc(1, sizeof(struct multihop_p));*/
   stack[0].pip = pi0; 
   stack[0].pip->channel = ch0; 
-  //stack[0].pip->mesh_param = msh_p; 
-  //stack[0].pip->multihop_param = mhop_p; 
   stack[0].modno = 6; 
   struct stackmodule_i *amodule0; 
   amodule0 = (struct stackmodule_i*) calloc( 
@@ -181,17 +175,8 @@ stack_init()
   pi1 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch1; 
   ch1 = (struct channel*) calloc(1, sizeof(struct channel));
-  /*struct polite_p *poli_p;
-  poli_p = (struct polite_p*) calloc(1, sizeof(struct polite_p));
-  struct netflood_p *netfl_p;
-  netfl_p = (struct netflood_p*) calloc(1, sizeof(struct netflood_p));
-  struct route_discovery_p *route_discov_p;
-  route_discov_p = (struct route_discovery_p*) calloc(1, sizeof(struct route_discovery_p));*/
   stack[1].pip = pi1; 
   stack[1].pip->channel = ch1;
-  /*stack[1].pip->polite_param = poli_p;
-  stack[1].pip->netflood_param = netfl_p;
-  stack[1].pip->route_discovery_param = route_discov_p;*/
   stack[1].modno = 5; 
   struct stackmodule_i *amodule1; 
   amodule1 = (struct stackmodule_i*) calloc( 
