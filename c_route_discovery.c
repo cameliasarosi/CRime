@@ -111,7 +111,7 @@ static char rrep_pending; /* A reply for a request is pending. */
 static void send_rreq(struct pipe *p, struct stackmodule_i *module)
 {
   const rimeaddr_t *dest = get_node_addr(module->stack_id, 0, 3);
-  set_node_addr(module->stack_id, 1, 3, dest);
+  //set_node_addr(module->stack_id, 1, 3, dest);
 
   rimeaddr_t dest_copy;
 
@@ -120,7 +120,7 @@ static void send_rreq(struct pipe *p, struct stackmodule_i *module)
   rimeaddr_copy(&dest_copy, dest);
   dest = &dest_copy;
 
-  packetbuf_clear();
+  //packetbuf_clear();
   msg = packetbuf_dataptr();
   packetbuf_set_datalen(sizeof(struct route_msg));
 
@@ -166,6 +166,7 @@ static void send_rrep(struct pipe *p, struct stackmodule_i *module)
     PRINTF(
         "%d.%d: send_rrep to %d.%d via %d.%d\n", rimeaddr_node_addr.u8[0], 
         rimeaddr_node_addr.u8[1], dest->u8[0], dest->u8[1], rt->nexthop.u8[0], rt->nexthop.u8[1]);
+    stack[module->stack_id].send_rrep_flg = 1;
     //unicast_send(&c->rrepconn, &rt->nexthop);
     module->stack_id = RREP_STACK_ID;
     c_send(stack[RREP_STACK_ID].pip, stack[RREP_STACK_ID].amodule,

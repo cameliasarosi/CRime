@@ -90,9 +90,15 @@ c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
   uint8_t modno = stack[module[len].stack_id].modno ;
   //uint8_t stack_id = module->stack_id;
   //PRINTF("stack_id: %d\n", stack_id);
-   
+
+  if (stack[module->stack_id].not_dest_flg == 1) {
+	  return;
+  }
+  if(stack[module->stack_id].resend_flg != 1 && len == 5) {
+	  return;
+  }
   if(module[len].c_recv == NULL)
-    return;
+	  return;
 
 #if EVAL
   startTm2 = vsnTime_freeRunTime();

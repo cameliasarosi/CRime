@@ -122,7 +122,7 @@ c_unicast_recv(struct pipe *p, struct stackmodule_i *module)
   rimeaddr_t tmpaddr;
 
   rimeaddr_copy(&tmpaddr, packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
-  set_node_addr(module->stack_id, 1, 2, &tmpaddr);
+  //set_node_addr(module->stack_id, 1, 2, &tmpaddr);
 
   if(rimeaddr_cmp
      (packetbuf_addr(PACKETBUF_ADDR_RECEIVER), &rimeaddr_node_addr)) {
@@ -131,7 +131,7 @@ c_unicast_recv(struct pipe *p, struct stackmodule_i *module)
            packetbuf_addr(PACKETBUF_ADDR_SENDER)->u8[0],
            packetbuf_addr(PACKETBUF_ADDR_SENDER)->u8[1]);
   }
-  
+
   PRINTF("~c_unicast_recv \n");
    //printaddr(module->stack_id);
 }

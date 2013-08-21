@@ -117,9 +117,12 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
 
   packetbuf_hdrreduce(sizeof(struct netflood_hdr));
 
+  PRINTF("originator: %d.%d \n", p->netflood_param.hdr.originator.u8[0], p->netflood_param.hdr.originator.u8[1]);
+  PRINTF("last_originator: %d.%d \n", p->netflood_param.last_originator.u8[0], p->netflood_param.last_originator.u8[1]);
   if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
       && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
-    stack[module->stack_id].not_dest_flg=1;
+	PRINTF("no rreq! originator equals to last originator\n");
+	stack[module->stack_id].not_dest_flg = 1;
   }
 
   if (p->netflood_param.queuebuf != NULL) {
@@ -149,13 +152,12 @@ void c_netflood_close(struct pipe *p, struct stackmodule_i *module) {
 
 /*---------------------------------------------------------------------------*/
 int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
-
   if (p->netflood_param.doFlood == 1) {
-    if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
-        && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
-      stack[module->stack_id].not_dest_flg = 1;
-    }	
-    if(stack[module->stack_id].not_dest_flg != 1) {
+   // if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
+     //   && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
+      //stack[module->stack_id].not_dest_flg = 1;
+    //}
+    //if(stack[module->stack_id].not_dest_flg != 1) {
 
       if (p->netflood_param.queuebuf != NULL) {
         queuebuf_to_packetbuf(p->netflood_param.queuebuf);
@@ -185,9 +187,9 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
       }
       p->netflood_param.doFlood = 0;
       return 1;
-    } else {
-      PRINTF("no netflood rebroadcasting! originator equals to last originator\n");
-    }
+    //} else {
+      //PRINTF("no netflood rebroadcasting! originator equals to last originator\n");
+    //}
   } else {
     PRINTF("c_netflood_send \n");
     if (packetbuf_hdralloc(sizeof(struct netflood_hdr))) {

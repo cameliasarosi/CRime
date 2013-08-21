@@ -110,6 +110,9 @@ c_echo_app_recv(struct pipe *p, struct stackmodule_i *module)
   PRINTF("c_echo_app_recv\n");
   printaddr(module->stack_id);
   printf("----------- received %s \n", (char *)packetbuf_dataptr());
+  stack[module->stack_id].packet_loss_rate = (stack[module->stack_id].number_packets_sent -
+		  stack[module->stack_id].number_packets_received)/stack[module->stack_id].number_packets_sent;
+  PRINTF("packet_loss_rate: %d \n", stack[module->stack_id].packet_loss_rate);
 
   rimeaddr_t esender, ereceiver, addr;
 
@@ -132,9 +135,10 @@ c_echo_app_recv(struct pipe *p, struct stackmodule_i *module)
 	  set_node_addr(module->stack_id, 0, 1, &ereceiver);
 	  set_node_addr(module->stack_id, 0, 2, &esender);
 	  set_node_addr(module->stack_id, 0, 3, &esender);
-	  set_node_addr(module->stack_id, 1, 1, &ereceiver);
-	  set_node_addr(module->stack_id, 1, 2, &esender);
-	  set_node_addr(module->stack_id, 1, 3, &esender);
+	  //set_node_addr(module->stack_id, 1, 1, &ereceiver);
+	  //set_node_addr(module->stack_id, 1, 2, &esender);
+	  //set_node_addr(module->stack_id, 1, 3, &esender);
+	  printaddr(module->stack_id);
 	  stack_send(stack, stack[module->stack_id].modno - 1);
   }
 }

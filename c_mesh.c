@@ -110,11 +110,6 @@ static void found_route(struct pipe *p, struct stackmodule_i *module) {
   struct route_entry *rt;
   rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
   PRINTF("found route \n");
-  
-  PRINTF("dest address: %d.%d \n", tmpaddr->u8[0], tmpaddr->u8[1]);
-  PRINTF("queued data dest: %d.%d \n", p->mesh_param.queued_data_dest.u8[0], 
-         p->mesh_param.queued_data_dest.u8[1]);
-  
   if (p->mesh_param.queued_data != NULL && 
       rimeaddr_cmp (tmpaddr, &p->mesh_param.queued_data_dest )) {
     queuebuf_to_packetbuf(p->mesh_param.queued_data);
@@ -124,7 +119,7 @@ static void found_route(struct pipe *p, struct stackmodule_i *module) {
       if (rt != NULL) {
         //c_send(stack[module->stack_id].pip, stack[module->stack_id].amodule, module->module_id - 2);
     	set_node_addr(module->stack_id, 0, 2, &rt->nexthop);
-        stack_send(&stack[module->stack_id], module->module_id - 2);
+        stack_send(&stack[module->stack_id], module->module_id - 1);
       } else {
         c_timed_out(stack[module->stack_id].pip, stack[module->stack_id].amodule, 
                     module->module_id);
@@ -162,6 +157,8 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("%d.%d: mesh_send to %d.%d\n",
 			rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
 			tmpaddr->u8[0], tmpaddr->u8[1]);
+	stack[module->stack_id].number_packets_sent += 1;
+	PRINTF("number of packets sent: %d \n", stack[module->stack_id].number_packets_sent);
 	could_send = stack_send(stack, module->module_id - 1);
 	//could_send=c_multihop_send(stack[module->stack_id].pip,stack[module-> stack_id].amodule);
 
@@ -170,7 +167,6 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 			queuebuf_free(p->mesh_param.queued_data);
 		} PRINTF("mesh_send: queueing data, sending rreq\n");
 
-		PRINTF("stack_id: %d ",module->stack_id);
 		p->mesh_param.queued_data = queuebuf_new_from_packetbuf();
 		tmpaddr = get_node_addr(module->stack_id, 0, 3);
 		rimeaddr_copy(&p->mesh_param.queued_data_dest, tmpaddr);
@@ -185,11 +181,12 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 				get_node_addr(module->stack_id, 0, 2));
 		set_node_addr(module->stack_id + 1, 0, 3,
 				get_node_addr(module->stack_id, 0, 3));
-
+		printaddr(module->stack_id);
 		c_send(stack[module->stack_id + 1].pip,
 				stack[module->stack_id + 1].amodule, module_id - 1);
 		
-	} PRINTF("~c_mesh_send\n");
+	}
+	PRINTF("~c_mesh_send\n");
 	return 0;
 }
 
@@ -210,8 +207,8 @@ void c_mesh_recv(struct pipe *p, struct stackmodule_i *module) {
 	}
 	
 	if (stack[RREQ_STACK_ID].rrep_received_flg == 1) {
-	  stack[RREQ_STACK_ID].rrep_received_flg = 0;
-	  found_route(p, module);
+		stack[RREQ_STACK_ID].rrep_received_flg = 0;
+		found_route(p, module);
 	}
 }
 

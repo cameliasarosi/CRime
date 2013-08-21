@@ -78,8 +78,8 @@ stack_init()
   struct stackmodule_i *amodule0; 
   amodule0 = (struct stackmodule_i*) calloc( 
       stack[0].modno, sizeof(struct stackmodule_i)); 
-  addr.u8[0]=rimeaddr_node_addr.u8[0];
-  addr.u8[1]=rimeaddr_node_addr.u8[1];
+  addr.u8[0] = rimeaddr_node_addr.u8[0];
+  addr.u8[1] = rimeaddr_node_addr.u8[1];
   //addr.u8[0] = 0; addr.u8[1] = 0; 
   set_node_addr(0, OUT, SENDER, &addr); 
 
@@ -107,9 +107,8 @@ stack_init()
   amodule0[1].module_id = 1; 
   amodule0[1].parent = NULL;
   amodule0[1].time_trigger_flg = 0;
-  addr.u8[0]=rimeaddr_node_addr.u8[0];
-  addr.u8[1]=rimeaddr_node_addr.u8[1];
-  //addr.u8[0] = 1; addr.u8[1] = 0; 
+  addr.u8[0] = rimeaddr_node_addr.u8[0];
+  addr.u8[1] = rimeaddr_node_addr.u8[1];
   set_node_addr(0, OUT, SENDER, &addr);
   amodule0[1].c_open = c_broadcast_open;
   amodule0[1].c_close = c_broadcast_close;
@@ -133,10 +132,12 @@ stack_init()
   amodule0[3].module_id = 3; 
   amodule0[3].parent = NULL;
   amodule0[3].time_trigger_flg = 0;
-  addr.u8[0]=3;addr.u8[1]=0;
+  addr.u8[0] = 3; addr.u8[1] = 0;
   set_node_addr(0, OUT, ERECEIVER, &addr);
-  addr.u8[0] = 1; addr.u8[1] = 0;
+  //packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &addr);
+  addr.u8[0] = 2; addr.u8[1] = 0;
   set_node_addr(0, OUT, ESENDER, &addr);
+
   amodule0[3].c_open = c_multihop_open;
   amodule0[3].c_close = c_multihop_close;
   amodule0[3].c_send = c_multihop_send;
@@ -181,8 +182,8 @@ stack_init()
   struct stackmodule_i *amodule1; 
   amodule1 = (struct stackmodule_i*) calloc( 
       stack[1].modno, sizeof(struct stackmodule_i)); 
-  addr.u8[0]=rimeaddr_node_addr.u8[0];
-  addr.u8[1]=rimeaddr_node_addr.u8[1];
+  addr.u8[0] = rimeaddr_node_addr.u8[0];
+  addr.u8[1] = rimeaddr_node_addr.u8[1];
   //addr.u8[0] = 0; addr.u8[1] = 0; 
   set_node_addr(0, OUT, SENDER, &addr); 
 
@@ -210,9 +211,9 @@ stack_init()
   amodule1[1].module_id = 1; 
   amodule1[1].parent = NULL;
   amodule1[1].time_trigger_flg = 0;
-  addr.u8[0]=rimeaddr_node_addr.u8[0];
-  addr.u8[1]=rimeaddr_node_addr.u8[1];
-  //addr.u8[0] = 1; addr.u8[1] = 0; 
+  addr.u8[0] = rimeaddr_node_addr.u8[0];
+  addr.u8[1] = rimeaddr_node_addr.u8[1];
+  //addr.u8[0] = 1; addr.u8[1] = 0;
   set_node_addr(1, OUT, SENDER, &addr);
   amodule1[1].c_open = c_broadcast_open;
   amodule1[1].c_close = c_broadcast_close;
@@ -245,8 +246,6 @@ stack_init()
   amodule1[4].module_id = 4; 
   amodule1[4].parent = &amodule0[4];
   amodule1[4].time_trigger_flg = 0;
-  //addr.u8[0] = 3; addr.u8[1] = 0;
-  //set_node_addr(1, OUT, ERECEIVER, &addr);
   amodule1[4].c_open = c_route_discovery_open;
   amodule1[4].c_close = c_route_discovery_close;
   amodule1[4].c_send = c_route_discovery_discover;
@@ -263,8 +262,8 @@ stack_init()
   struct stackmodule_i *amodule2; 
   amodule2 = (struct stackmodule_i*) calloc( 
       stack[2].modno, sizeof(struct stackmodule_i));
-  addr.u8[0]=rimeaddr_node_addr.u8[0];
-  addr.u8[1]=rimeaddr_node_addr.u8[1];
+  addr.u8[0] = rimeaddr_node_addr.u8[0];
+  addr.u8[1] = rimeaddr_node_addr.u8[1];
   //addr.u8[0] = 0; addr.u8[1] = 0; 
   set_node_addr(0, OUT, SENDER, &addr); 
 
@@ -292,8 +291,8 @@ stack_init()
   amodule2[1].module_id = 1; 
   amodule2[1].parent = NULL;
   amodule2[1].time_trigger_flg = 0;
-  addr.u8[0]=rimeaddr_node_addr.u8[0];
-  addr.u8[1]=rimeaddr_node_addr.u8[1];
+  addr.u8[0] = rimeaddr_node_addr.u8[0];
+  addr.u8[1] = rimeaddr_node_addr.u8[1];
   //addr.u8[0] = 1; addr.u8[1] = 0; 
   set_node_addr(2, OUT, SENDER, &addr);
   amodule2[1].c_open = c_broadcast_open;
@@ -306,7 +305,7 @@ stack_init()
   amodule2[2].module_id = 2; 
   amodule2[2].parent = &amodule1[4];
   amodule2[2].time_trigger_flg = 0;
-  addr.u8[0] = 3; addr.u8[1] = 0; 
+  addr.u8[0] = 3; addr.u8[1] = 0;
   set_node_addr(2, OUT, RECEIVER, &addr);
   amodule2[2].c_open = c_unicast_open;
   amodule2[2].c_close = c_unicast_close;
@@ -419,13 +418,14 @@ stack_recv(struct stackmodule_i *module)
   uint8_t stack_id = module->stack_id;
   uint8_t mod_id = module->module_id;
   
-  if(stack[stack_id].not_dest_flg == 1) {
-    return;
-  }
+  if(stack[stack_id].send_rrep_flg == 1) {
+	  PRINTF("route reply was already sent\n");
+      return;
+     }
 
- // if(stack[module->stack_id].resend_flg == 1) {
-   // return;
-  //}
+  /*if(stack[stack_id].not_dest_flg == 1) {
+    return;
+  }*/
   
   int modno = stack[stack_id].modno - 1;
   
@@ -435,16 +435,18 @@ stack_recv(struct stackmodule_i *module)
     }
   }
 
-  if(module->module_id == 0 && stack[module->stack_id].not_dest_flg == 1) {
+  if(module->module_id == 0 && stack[stack_id].not_dest_flg == 1) {
     stack[stack_id].not_dest_flg = 0; 
     return;
   }
 
   if(stack[stack_id].amodule[modno].parent != NULL) {
-    stack[stack_id].merged_flg = 1;
-    uint8_t parent_stack_id = stack[stack_id].amodule[modno].parent->stack_id;
-    uint8_t parent_mod_id = stack[stack_id].amodule[modno].parent->module_id;
-    stack_recv(&stack[parent_stack_id].amodule[parent_mod_id]);
+	  if((stack_id == 2) || (stack_id == 1 && 	stack[stack_id].rrep_received_flg  == 1)) {
+		  stack[stack_id].merged_flg = 1;
+		  uint8_t parent_stack_id = stack[stack_id].amodule[modno].parent->stack_id;
+		  uint8_t parent_mod_id = stack[stack_id].amodule[modno].parent->module_id;
+		  stack_recv(&stack[parent_stack_id].amodule[parent_mod_id]);
+	  }
   }
   PRINTF("~stack_recv \n");
 }

@@ -154,12 +154,12 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 	/* Copy the packet attributes to avoid them being overwritten or
 	 cleared by an application program that uses the packet buffer for
 	 its own needs. */
-	rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+	//rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
 	rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
-	set_node_addr(module->stack_id, 1, 1, &esender);
-	set_node_addr(module->stack_id, 1, 3, &ereceiver);
+	//set_node_addr(module->stack_id, 1, 1, &esender);
+	//set_node_addr(module->stack_id, 1, 3, &ereceiver);
 
-	PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+	//PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
 	PRINTF("ereceiver: %d.%d \n", ereceiver.u8[0], ereceiver.u8[1]);
 
 
@@ -170,6 +170,8 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 			&rimeaddr_node_addr)) {
 		stack[module->stack_id].resend_flg = 1;
 		PRINTF("for us!\n");
+		stack[module->stack_id].number_packets_received += 1;
+		PRINTF("number of packets received: %d \n", stack[module->stack_id].number_packets_received);
 		p->multihop_param.hop_no = packetbuf_attr(PACKETBUF_ATTR_HOPS);
 	} else {
 		nexthop = c_forward(p, stack[module->stack_id].amodule, stack[module->stack_id].modno);
