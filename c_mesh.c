@@ -110,7 +110,7 @@ static void found_route(struct pipe *p, struct stackmodule_i *module) {
   struct route_entry *rt;
   rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
   PRINTF("found route \n");
-  if (p->mesh_param.queued_data != NULL && 
+  if (p->mesh_param.queued_data != NULL &&
       rimeaddr_cmp (tmpaddr, &p->mesh_param.queued_data_dest )) {
     queuebuf_to_packetbuf(p->mesh_param.queued_data);
     queuebuf_free(p->mesh_param.queued_data);
@@ -157,8 +157,8 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("%d.%d: mesh_send to %d.%d\n",
 			rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
 			tmpaddr->u8[0], tmpaddr->u8[1]);
-	stack[module->stack_id].number_packets_sent += 1;
-	PRINTF("number of packets sent: %d \n", stack[module->stack_id].number_packets_sent);
+	//stack[module->stack_id].number_packets_sent += 1;
+	//PRINTF("number of packets sent: %d \n", stack[module->stack_id].number_packets_sent);
 	could_send = stack_send(stack, module->module_id - 1);
 	//could_send=c_multihop_send(stack[module->stack_id].pip,stack[module-> stack_id].amodule);
 

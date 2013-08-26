@@ -170,8 +170,8 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 			&rimeaddr_node_addr)) {
 		stack[module->stack_id].resend_flg = 1;
 		PRINTF("for us!\n");
-		stack[module->stack_id].number_packets_received += 1;
-		PRINTF("number of packets received: %d \n", stack[module->stack_id].number_packets_received);
+		//stack[module->stack_id].number_packets_received += 1;
+		//PRINTF("number of packets received: %d \n", stack[module->stack_id].number_packets_received);
 		p->multihop_param.hop_no = packetbuf_attr(PACKETBUF_ATTR_HOPS);
 	} else {
 		nexthop = c_forward(p, stack[module->stack_id].amodule, stack[module->stack_id].modno);

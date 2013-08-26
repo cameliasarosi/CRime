@@ -99,7 +99,36 @@ int
 c_echo_app_send(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("~c_echo_app_send\n");
-  printf("----------- sending %s \n", (char *)packetbuf_dataptr());
+  /*rimeaddr_t esender, ereceiver, addr;
+
+   rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+   rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
+
+   /*printf("Data received from %d.%d: %s (%d)\n",
+ 		  esender.u8[0], esender.u8[1],
+ 		  packetbuf_datalen(), (char *)packetbuf_dataptr(), packetbuf_datalen());*/
+
+   /*if(stack[module->stack_id].resend_flg == 1) {
+ 	  stack[module->stack_id].resend_flg = 0;
+ 	  packetbuf_clear;
+ 	  packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &ereceiver);
+ 	  packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &esender);
+ 	  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &esender);
+ 	  addr.u8[0]=rimeaddr_node_addr.u8[0];
+ 	  addr.u8[1]=rimeaddr_node_addr.u8[1];
+ 	  set_node_addr(module->stack_id, 0, 0, &addr);
+ 	  set_node_addr(module->stack_id, 0, 1, &ereceiver);
+ 	  set_node_addr(module->stack_id, 0, 2, &esender);
+ 	  set_node_addr(module->stack_id, 0, 3, &esender);
+ 	  //set_node_addr(module->stack_id, 1, 1, &ereceiver);
+ 	  //set_node_addr(module->stack_id, 1, 2, &esender);
+ 	  //set_node_addr(module->stack_id, 1, 3, &esender);
+ 	  printaddr(module->stack_id);
+   }*/
+  	//strcpy(stack[module->stack_id].packet_data, (char *)packetbuf_dataptr());
+  	printf("----------- sending %s \n", (char *)packetbuf_dataptr());
+  	stack[module->stack_id].number_packets_sent += 1;
+  	PRINTF("number of packets sent: %d \n", stack[module->stack_id].number_packets_sent);
   return 1;
 }
 
@@ -110,37 +139,9 @@ c_echo_app_recv(struct pipe *p, struct stackmodule_i *module)
   PRINTF("c_echo_app_recv\n");
   printaddr(module->stack_id);
   printf("----------- received %s \n", (char *)packetbuf_dataptr());
-  stack[module->stack_id].packet_loss_rate = (stack[module->stack_id].number_packets_sent -
-		  stack[module->stack_id].number_packets_received)/stack[module->stack_id].number_packets_sent;
-  PRINTF("packet_loss_rate: %d \n", stack[module->stack_id].packet_loss_rate);
-
-  rimeaddr_t esender, ereceiver, addr;
-
-  rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
-  rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
-
-  /*printf("Data received from %d.%d: %s (%d)\n",
-		  esender.u8[0], esender.u8[1],
-		  packetbuf_datalen(), (char *)packetbuf_dataptr(), packetbuf_datalen());*/
-
-  if(stack[module->stack_id].resend_flg == 1) {
-	  stack[module->stack_id].resend_flg = 0;
-	  packetbuf_clear;
-	  packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &ereceiver);
-	  packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &esender);
-	  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &esender);
-	  addr.u8[0]=rimeaddr_node_addr.u8[0];
-	  addr.u8[1]=rimeaddr_node_addr.u8[1];
-	  set_node_addr(module->stack_id, 0, 0, &addr);
-	  set_node_addr(module->stack_id, 0, 1, &ereceiver);
-	  set_node_addr(module->stack_id, 0, 2, &esender);
-	  set_node_addr(module->stack_id, 0, 3, &esender);
-	  //set_node_addr(module->stack_id, 1, 1, &ereceiver);
-	  //set_node_addr(module->stack_id, 1, 2, &esender);
-	  //set_node_addr(module->stack_id, 1, 3, &esender);
-	  printaddr(module->stack_id);
-	  stack_send(stack, stack[module->stack_id].modno - 1);
-  }
+  stack[module->stack_id].number_packets_received += 1;
+  PRINTF("number of packets received: %d \n", stack[module->stack_id].number_packets_received);
+  //stack_send(stack, stack[module->stack_id].modno - 1);
 }
 
 void

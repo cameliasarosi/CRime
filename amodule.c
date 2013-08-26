@@ -80,7 +80,6 @@ void
 c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 {
   PRINTF("c_recv %d\n", len);
-
 #if EVAL
   startTm2 = c_get_start_tm();
   stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
@@ -104,6 +103,14 @@ c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
   startTm2 = vsnTime_freeRunTime();
 #endif
   
+  rimeaddr_t esender, sender;
+    rimeaddr_copy(&sender, get_node_addr(module->stack_id, 1, 0));
+    PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
+    rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
+    PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+
+
+
   module[len].c_recv(p, &module[len]);
   
 #if EVAL

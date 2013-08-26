@@ -72,8 +72,14 @@ stack_init()
   pi0 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch0; 
   ch0 = (struct channel*) calloc(1, sizeof(struct channel));
+  //struct mesh_p *msh_p;
+  //msh_p = (struct mesh_p*) calloc(1, sizeof(struct mesh_p));
+  //struct multihop_p *mhop_p;
+  //mhop_p = (struct multihop_p*) calloc(1, sizeof(struct multihop_p));
   stack[0].pip = pi0; 
   stack[0].pip->channel = ch0; 
+  //stack[0].pip->mesh_param = msh_p;
+  //stack[0].pip->multihop_param = mhop_p;
   stack[0].modno = 6; 
   struct stackmodule_i *amodule0; 
   amodule0 = (struct stackmodule_i*) calloc( 
@@ -120,7 +126,7 @@ stack_init()
   amodule0[2].module_id = 2; 
   amodule0[2].parent = NULL;
   amodule0[2].time_trigger_flg = 0;
-  addr.u8[0] = 3; addr.u8[1] = 0;
+  addr.u8[0] = 4; addr.u8[1] = 0;
   set_node_addr(0, OUT, RECEIVER, &addr);
   amodule0[2].c_open = c_unicast_open;
   amodule0[2].c_close = c_unicast_close;
@@ -132,10 +138,12 @@ stack_init()
   amodule0[3].module_id = 3; 
   amodule0[3].parent = NULL;
   amodule0[3].time_trigger_flg = 0;
-  addr.u8[0] = 3; addr.u8[1] = 0;
+  addr.u8[0] = 4; addr.u8[1] = 0;
   set_node_addr(0, OUT, ERECEIVER, &addr);
   //packetbuf_set_addr(PACKETBUF_ADDR_ERECEIVER, &addr);
-  addr.u8[0] = 2; addr.u8[1] = 0;
+  addr.u8[0] = 1; addr.u8[1] = 0;
+  //addr.u8[0] = rimeaddr_node_addr.u8[0];
+  //addr.u8[1] = rimeaddr_node_addr.u8[1];
   set_node_addr(0, OUT, ESENDER, &addr);
 
   amodule0[3].c_open = c_multihop_open;
@@ -176,8 +184,17 @@ stack_init()
   pi1 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch1; 
   ch1 = (struct channel*) calloc(1, sizeof(struct channel));
+  /*struct polite_p *poli_p;
+  poli_p = (struct polite_p*) calloc(1, sizeof(struct polite_p));
+  struct netflood_p *netfl_p;
+  netfl_p = (struct netflood_p*) calloc(1, sizeof(struct netflood_p));
+  struct route_discovery_p *route_discov_p;
+  route_discov_p = (struct route_discovery_p*) calloc(1, sizeof(struct route_discovery_p));*/
   stack[1].pip = pi1; 
   stack[1].pip->channel = ch1;
+  /*stack[1].pip->polite_param = poli_p;
+  stack[1].pip->netflood_param = netfl_p;
+  stack[1].pip->route_discovery_param = route_discov_p;*/
   stack[1].modno = 5; 
   struct stackmodule_i *amodule1; 
   amodule1 = (struct stackmodule_i*) calloc( 
@@ -305,7 +322,7 @@ stack_init()
   amodule2[2].module_id = 2; 
   amodule2[2].parent = &amodule1[4];
   amodule2[2].time_trigger_flg = 0;
-  addr.u8[0] = 3; addr.u8[1] = 0;
+  addr.u8[0] = 4; addr.u8[1] = 0;
   set_node_addr(2, OUT, RECEIVER, &addr);
   amodule2[2].c_open = c_unicast_open;
   amodule2[2].c_close = c_unicast_close;

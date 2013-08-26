@@ -111,6 +111,9 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
   p->hop_no=p->netflood_param.hops;
   //rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
   set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
+  rimeaddr_t esender;
+  rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
+  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
 
   /* Remember packet if we need to forward it. */
   p->netflood_param.queuebuf = queuebuf_new_from_packetbuf();

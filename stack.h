@@ -36,7 +36,6 @@ struct stack_i {
   uint8_t send_rrep_flg;
   uint8_t number_packets_sent;
   uint8_t number_packets_received;
-  uint8_t packet_loss_rate;
 };
 
 struct stack_i *stack;
