@@ -182,7 +182,7 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
           printaddr(module->stack_id);
           p->netflood_param.hdr.hop_no++;
           memcpy(packetbuf_dataptr(), &p->netflood_param.hdr, sizeof(struct netflood_hdr));
-          //stack_send(&stack[module->stack_id], module->module_id); //c_send(p, amodule, );
+          //stack_send(&stack[module->stack_id], module->module_id);
           rimeaddr_copy(&p->netflood_param.last_originator,
                         &p->netflood_param.hdr.originator);
           p->netflood_param.last_originator_seq_no = p->netflood_param.hdr.originator_seq_no;

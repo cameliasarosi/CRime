@@ -150,10 +150,14 @@ c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 }
 
 void
-set_amodule_trigger(int stackIdx, char *buf)
+set_amodule_trigger(int stackIdx)
 {
 
-  PRINTF("set_amodule_trigger %s \n", buf);
+  PRINTF("set_amodule_trigger \n");
+/*  packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &originator);
+  rimeaddr_t esender;
+  rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
+  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);*/
   int i = 0, modIdx = 0;
 
   for(i = 0; i < stack[stackIdx].modno; i++) {
@@ -161,7 +165,7 @@ set_amodule_trigger(int stackIdx, char *buf)
       modIdx = i;
     }
   }
-  PRINTF("%d %d %s\n", stack[stackIdx].amodule[modIdx].stack_id, modIdx, buf);
+  PRINTF("%d %d\n", stack[stackIdx].amodule[modIdx].stack_id, modIdx);
 
   if(stack[stackIdx].amodule[modIdx].time_trigger_flg == 0) {
     return;
@@ -169,11 +173,11 @@ set_amodule_trigger(int stackIdx, char *buf)
   //put application data in the queue, it will be sent on time trigger
   struct trigger_param *param =
     (struct trigger_param *)malloc(sizeof(struct trigger_param));
-  param->buf = (char *)malloc(sizeof(char));
   param->stackidx = stackIdx;
   param->modidx = modIdx;
   param->triggerno = stack[stackIdx].amodule[modIdx].trigger_no;
-  memcpy(param->buf, buf, 4);
+  memcpy(&param->hdr, packetbuf_dataptr(), sizeof(struct param_hdr));
+  PRINTF("originator: %d.%d \n", param->hdr.originator.u8[0], param->hdr.originator.u8[1]);
   stack[stackIdx].amodule[modIdx].trigger_init_flg = 1;
   ctimer_set(&stack[stackIdx].amodule[modIdx].timer,
              stack[stackIdx].amodule[modIdx].trigger_interval,
@@ -196,17 +200,18 @@ c_send(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 void
 c_triggered_send(struct trigger_param *param)
 {
-  PRINTF("c_triggered_send %s\n", (char *)param->buf);
-  packetbuf_copyfrom(param->buf, 4);
+  PRINTF("c_triggered_send\n");
+  packetbuf_copyfrom(&param->hdr, sizeof(struct param_hdr));
+  memcpy(&param->hdr, packetbuf_dataptr(), sizeof(struct param_hdr));
+  PRINTF("originator: %d.%d \n", param->hdr.originator.u8[0], param->hdr.originator.u8[1]);
   c_send(stack[param->stackidx].pip,
          stack[param->stackidx].amodule, param->modidx);
 
   int modno = param->modidx;    //stack[param->amodule[param->modidx].stack_id].modno - 1;
-
-  PRINTF("!!!! %d %d %d %s %s\n", modno,
+  stack[param->stackidx].amodule[modno].trigger_interval += 5;
+  PRINTF("!!!! %d %d %d %s\n", modno,
          stack[param->stackidx].amodule[modno].trigger_th,
-         param->triggerno,
-         (char *)param->buf, (char *)stack[param->stackidx].pip->buf);
+         param->triggerno, (char *)stack[param->stackidx].pip->buf);
   if(stack[param->stackidx].amodule[modno].trigger_th &&
      (--param->triggerno > 0)) {
     ctimer_set(&stack[param->stackidx].amodule[modno].timer,

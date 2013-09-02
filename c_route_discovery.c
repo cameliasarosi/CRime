@@ -254,8 +254,8 @@ static void rrep_packet_received(struct pipe *p, struct stackmodule_i *module)
 static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("rreq_packet_received\n");
-  struct route_msg *msg = packetbuf_dataptr();
 
+  struct route_msg *msg = packetbuf_dataptr();
   set_node_addr(module->stack_id, 1, 2, &msg->dest);
 
   rimeaddr_t esender, sender;
@@ -361,11 +361,10 @@ void c_route_discovery_recv(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("c_route_discovery_recv\n");
   rimeaddr_t esender, sender;
-    rimeaddr_copy(&sender, get_node_addr(module->stack_id, 1, 0));
-    PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
-    rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
-    PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
-
+  rimeaddr_copy(&sender, get_node_addr(module->stack_id, 1, 0));
+  PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
+  rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
+  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
 
   if(stack[RREP_STACK_ID].merged_flg) {
     stack[RREP_STACK_ID].merged_flg = 0;

@@ -145,7 +145,6 @@ stack_init()
   //addr.u8[0] = rimeaddr_node_addr.u8[0];
   //addr.u8[1] = rimeaddr_node_addr.u8[1];
   set_node_addr(0, OUT, ESENDER, &addr);
-
   amodule0[3].c_open = c_multihop_open;
   amodule0[3].c_close = c_multihop_close;
   amodule0[3].c_send = c_multihop_send;
@@ -241,7 +240,9 @@ stack_init()
   amodule1[2].stack_id = 1; 
   amodule1[2].module_id = 2; 
   amodule1[2].parent = NULL;
-  amodule1[2].time_trigger_flg = 0;
+  amodule1[2].time_trigger_flg = 1;
+  amodule1[2].trigger_no = 3;
+  amodule1[2].trigger_interval = 5;
   amodule1[2].c_open = c_polite_open;
   amodule1[2].c_close = c_polite_close;
   amodule1[2].c_send = c_polite_send;
@@ -435,10 +436,10 @@ stack_recv(struct stackmodule_i *module)
   uint8_t stack_id = module->stack_id;
   uint8_t mod_id = module->module_id;
   
-  if(stack[stack_id].send_rrep_flg == 1) {
+  /*if(stack[stack_id].send_rrep_flg == 1) {
 	  PRINTF("route reply was already sent\n");
       return;
-     }
+     }*/
 
   /*if(stack[stack_id].not_dest_flg == 1) {
     return;

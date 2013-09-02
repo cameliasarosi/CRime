@@ -116,6 +116,7 @@ struct route_discovery_p {
   rimeaddr_t last_rreq_originator;
   uint16_t last_rreq_id;
   uint16_t rreq_id;
+  //struct route_discovery_hdr hdr;
 };
 
 //@definedFor c_multihop
@@ -213,10 +214,16 @@ void c_discover(struct pipe *p, struct stackmodule_i *module, uint8_t len);
 
 void c_timed_out(struct pipe *p, struct stackmodule_i *module, uint8_t len);
 
+struct param_hdr {
+	uint16_t originator_seq_no;
+	rimeaddr_t originator;
+};
+
 struct trigger_param {
   //struct pipe *pip;
   //struct stackmodule_i *amodule;
   char *buf;
+  struct param_hdr hdr;
   uint8_t stackidx;
   uint8_t modidx;
   uint8_t triggerno;
@@ -224,7 +231,7 @@ struct trigger_param {
 
 void c_triggered_send(struct trigger_param *param);
 
-void set_amodule_trigger(int stackIdx, char *buf);
+void set_amodule_trigger(int stackIdx);
 
 void set_node_addr(uint8_t stackid, uint8_t type, uint8_t addrid,
                    rimeaddr_t * addr);
