@@ -77,6 +77,10 @@ struct netflood_hdr {
 	uint16_t hop_no;
 };
 
+struct packet_addr {
+	rimeaddr_t addr;
+};
+
 //@definedFor c_polite
 struct polite_p {
   struct ctimer timer;
@@ -116,6 +120,7 @@ struct route_discovery_p {
   rimeaddr_t last_rreq_originator;
   uint16_t last_rreq_id;
   uint16_t rreq_id;
+  uint8_t trigger_flg;
   //struct route_discovery_hdr hdr;
 };
 
@@ -214,16 +219,24 @@ void c_discover(struct pipe *p, struct stackmodule_i *module, uint8_t len);
 
 void c_timed_out(struct pipe *p, struct stackmodule_i *module, uint8_t len);
 
-struct param_hdr {
+/*struct trigger_hdr {
 	uint16_t originator_seq_no;
 	rimeaddr_t originator;
-};
+	uint16_t hop_no;
+};*/
+
+/*struct trigger_route_msg {
+  rimeaddr_t dest;
+  uint8_t rreq_id;
+  uint8_t pad;
+};*/
 
 struct trigger_param {
   //struct pipe *pip;
   //struct stackmodule_i *amodule;
   char *buf;
-  struct param_hdr hdr;
+  //struct trigger_hdr hdr;
+  //struct trigger_route_msg *msg;
   uint8_t stackidx;
   uint8_t modidx;
   uint8_t triggerno;

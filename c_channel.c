@@ -109,6 +109,7 @@ void c_abc_input(struct pipe *p, struct stackmodule_i *module)
 			(char *)packetbuf_dataptr(), p->channel->channelno);
 	PRINTFE("\n %d \n", DURATION_TM(start_tm));
 }
+
 /*---------------------------------------------------------------------------*/
 
 /** @} */

@@ -80,72 +80,42 @@ void
 c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 {
   PRINTF("c_recv %d\n", len);
-#if EVAL
-  startTm2 = c_get_start_tm();
-  stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
-  printf("%d, ", stopTm1);
-#endif
   
   uint8_t modno = stack[module[len].stack_id].modno ;
   //uint8_t stack_id = module->stack_id;
   //PRINTF("stack_id: %d\n", stack_id);
 
-  if (stack[module->stack_id].not_dest_flg == 1) {
+  if (stack[module[len].stack_id].not_dest_flg == 1) {
 	  return;
   }
-  if(stack[module->stack_id].resend_flg != 1 && len == 5) {
+  if(stack[module[len].stack_id].resend_flg != 1 && len == 5) {
 	  return;
   }
   if(module[len].c_recv == NULL)
 	  return;
-
-#if EVAL
-  startTm2 = vsnTime_freeRunTime();
-#endif
-  
+  //printaddr(module[len].stack_id);
   rimeaddr_t esender, sender;
-    rimeaddr_copy(&sender, get_node_addr(module->stack_id, 1, 0));
-    PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
-    rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
-    PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+  rimeaddr_copy(&sender, get_node_addr(module[len].stack_id, 1, 0));
+  PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
+  rimeaddr_copy(&esender, get_node_addr(module[len].stack_id, 1, 1));
+  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
 
-
+ struct packet_addr *packet =
+ (struct packet_addr *)malloc(sizeof(struct packet_addr));
+ memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
+ PRINTF("Packetbuf_Address before: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
 
   module[len].c_recv(p, &module[len]);
-  
-#if EVAL
-  stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
-  printf("%d, ", stopTm1);
-
-  startTm2 = vsnTime_freeRunTime();
-#endif
-  
   len++;
   if((len >= 0) && (len < modno)) {
+	  struct packet_addr *packet =
+			  (struct packet_addr *)malloc(sizeof(struct packet_addr));
+	  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
+	  PRINTF("Packetbuf_Address after: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
+
     c_recv(p, module, len);
   }
-  
- /* if(module[len-1].parent  != NULL) {
-    stack[stack_id].merged_flg = 1;
-    uint8_t parent_stack_id = module[len-1].parent->stack_id;
-    uint8_t parent_module_id = module[len-1].parent->module_id;
-    PRINTF("parent_stack_id: %d \n", parent_stack_id);
-    PRINTF("parent_module_id: %d \n", parent_module_id);
-    //c_recv(p, module[len-1].parent, module[len-1].parent->module_id);
-    c_recv(p, stack[parent_stack_id].amodule, parent_module_id);  
-  }*/
 
-#if EVAL
-  stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
-  printf("%d\n ", stopTm1);
-#endif
-  /*if (len == modno) {
-     startTm2 = c_get_start_tm();
-     stopTm1 = vsnTime_freeRunTimeDiff(startTm2);
-     printf("%d %d %d\n ", len, startTm2, stopTm1);
-     } */
-
-  //printf("%d\n ", packets++);
   PRINTF("~c_recv %d\n", len);
 }
 
@@ -154,10 +124,6 @@ set_amodule_trigger(int stackIdx)
 {
 
   PRINTF("set_amodule_trigger \n");
-/*  packetbuf_set_addr(PACKETBUF_ADDR_ESENDER, &originator);
-  rimeaddr_t esender;
-  rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
-  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);*/
   int i = 0, modIdx = 0;
 
   for(i = 0; i < stack[stackIdx].modno; i++) {
@@ -165,7 +131,8 @@ set_amodule_trigger(int stackIdx)
       modIdx = i;
     }
   }
-  PRINTF("%d %d\n", stack[stackIdx].amodule[modIdx].stack_id, modIdx);
+
+  //PRINTF("%d %d\n", stack[stackIdx].amodule[modIdx].stack_id, modIdx);
 
   if(stack[stackIdx].amodule[modIdx].time_trigger_flg == 0) {
     return;
@@ -176,8 +143,14 @@ set_amodule_trigger(int stackIdx)
   param->stackidx = stackIdx;
   param->modidx = modIdx;
   param->triggerno = stack[stackIdx].amodule[modIdx].trigger_no;
-  memcpy(&param->hdr, packetbuf_dataptr(), sizeof(struct param_hdr));
-  PRINTF("originator: %d.%d \n", param->hdr.originator.u8[0], param->hdr.originator.u8[1]);
+  //memcpy(&param->hdr, packetbuf_dataptr(), sizeof(struct trigger_hdr));
+  //const rimeaddr_t *dest = get_node_addr(param->stackidx, 1, 2);
+  //param->msg = packetbuf_dataptr();
+  //packetbuf_set_datalen(sizeof(struct trigger_route_msg));
+  //memcpy(&param->msg, packetbuf_dataptr(), sizeof(struct trigger_route_msg));
+  //rimeaddr_copy(&param->msg->dest, dest);
+  //PRINTF("dest: %d.%d \n", param->msg->dest.u8[0], param->msg->dest.u8[1]);
+
   stack[stackIdx].amodule[modIdx].trigger_init_flg = 1;
   ctimer_set(&stack[stackIdx].amodule[modIdx].timer,
              stack[stackIdx].amodule[modIdx].trigger_interval,
@@ -188,9 +161,17 @@ int
 c_send(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 {
   PRINTF("c_send %d\n", len);
+  struct packet_addr *packet =
+  (struct packet_addr *)malloc(sizeof(struct packet_addr));
+  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
+  PRINTF("Packetbuf_Address before: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
   int send_flg = module[len].c_send(p, &module[len]);
   len--;
   if((len >= 0) && (len < 255) && (send_flg)) {
+	  struct packet_addr *packet =
+	        (struct packet_addr *)malloc(sizeof(struct packet_addr));
+	  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
+	  PRINTF("Packetbuf_Address after: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
     c_send(p, module, len);
   }
   PRINTF("~c_send %d\n", len);
@@ -201,17 +182,15 @@ void
 c_triggered_send(struct trigger_param *param)
 {
   PRINTF("c_triggered_send\n");
-  packetbuf_copyfrom(&param->hdr, sizeof(struct param_hdr));
-  memcpy(&param->hdr, packetbuf_dataptr(), sizeof(struct param_hdr));
-  PRINTF("originator: %d.%d \n", param->hdr.originator.u8[0], param->hdr.originator.u8[1]);
+  //packetbuf_copyfrom(&param->hdr, sizeof(struct trigger_hdr));
   c_send(stack[param->stackidx].pip,
-         stack[param->stackidx].amodule, param->modidx);
+         stack[param->stackidx].amodule, param->modidx + 1);
 
   int modno = param->modidx;    //stack[param->amodule[param->modidx].stack_id].modno - 1;
-  stack[param->stackidx].amodule[modno].trigger_interval += 5;
-  PRINTF("!!!! %d %d %d %s\n", modno,
+  stack[param->stackidx].amodule[modno].trigger_interval += 12;
+  /*PRINTF("!!!! %d %d %d %s\n", modno,
          stack[param->stackidx].amodule[modno].trigger_th,
-         param->triggerno, (char *)stack[param->stackidx].pip->buf);
+         param->triggerno, (char *)stack[param->stackidx].pip->buf);*/
   if(stack[param->stackidx].amodule[modno].trigger_th &&
      (--param->triggerno > 0)) {
     ctimer_set(&stack[param->stackidx].amodule[modno].timer,

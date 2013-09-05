@@ -127,7 +127,6 @@ static void send_rreq(struct pipe *p, struct stackmodule_i *module)
   msg->pad = 0;
   msg->rreq_id = p->route_discovery_param.rreq_id;
   rimeaddr_copy(&msg->dest, dest);
-
   //netflood_send(&c->rreqconn, c->rreq_id);
   //c->rreq_id++;
   p->route_discovery_param.rreq_id++;
@@ -166,9 +165,7 @@ static void send_rrep(struct pipe *p, struct stackmodule_i *module)
     PRINTF(
         "%d.%d: send_rrep to %d.%d via %d.%d\n", rimeaddr_node_addr.u8[0], 
         rimeaddr_node_addr.u8[1], dest->u8[0], dest->u8[1], rt->nexthop.u8[0], rt->nexthop.u8[1]);
-    stack[module->stack_id].send_rrep_flg = 1;
     //unicast_send(&c->rrepconn, &rt->nexthop);
-    module->stack_id = RREP_STACK_ID;
     c_send(stack[RREP_STACK_ID].pip, stack[RREP_STACK_ID].amodule,
            stack[RREP_STACK_ID].modno - 1);
 
@@ -254,15 +251,19 @@ static void rrep_packet_received(struct pipe *p, struct stackmodule_i *module)
 static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("rreq_packet_received\n");
-
   struct route_msg *msg = packetbuf_dataptr();
+  /*struct route_msg *msg =
+      (struct route_msg *)malloc(sizeof(struct route_msg));
+  memcpy(msg, packetbuf_dataptr(), sizeof(struct route_msg));*/
+
   set_node_addr(module->stack_id, 1, 2, &msg->dest);
 
-  rimeaddr_t esender, sender;
+  printaddr(module->stack_id);
+  /*rimeaddr_t esender, sender;
   rimeaddr_copy(&sender, get_node_addr(module->stack_id, 1, 0));
   PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
   rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
-  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);*/
 
   const rimeaddr_t *from = get_node_addr(module->stack_id, 1, 0);
   const rimeaddr_t *originator = get_node_addr(module->stack_id, 1, 1);
@@ -285,7 +286,7 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
 
     PRINTF(
         "%d.%d: rreq_packet_received: request for %d.%d originator %d.%d / %d\n", 
-        rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1], msg->dest.u8[0], 
+        rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1], msg->dest.u8[0],
         msg->dest.u8[1], originator->u8[0], originator->u8[1], msg->rreq_id);
 
     rimeaddr_copy(last_rreq_originator, originator);
@@ -360,6 +361,7 @@ int c_route_discovery_discover(struct pipe *p, struct stackmodule_i *module)
 void c_route_discovery_recv(struct pipe *p, struct stackmodule_i *module)
 {
   PRINTF("c_route_discovery_recv\n");
+  //printaddr(module->stack_id);
   rimeaddr_t esender, sender;
   rimeaddr_copy(&sender, get_node_addr(module->stack_id, 1, 0));
   PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
@@ -367,12 +369,11 @@ void c_route_discovery_recv(struct pipe *p, struct stackmodule_i *module)
   PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
 
   if(stack[RREP_STACK_ID].merged_flg) {
-    stack[RREP_STACK_ID].merged_flg = 0;
-    rrep_packet_received(stack[RREQ_STACK_ID].pip,
-                         stack[RREQ_STACK_ID].amodule);
+	  stack[RREP_STACK_ID].merged_flg = 0;
+	  rrep_packet_received(stack[RREQ_STACK_ID].pip,
+			  stack[RREQ_STACK_ID].amodule);
   } else {
-    rreq_packet_received(p, module);
-  }
+	  rreq_packet_received(p, module);}
   PRINTF("~c_route_discovery_recv\n");
 }
 

@@ -111,23 +111,33 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
   p->hop_no=p->netflood_param.hops;
   //rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
   set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
-  rimeaddr_t esender;
+  printaddr(module->stack_id);
+  /*rimeaddr_t esender;
   rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
-  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);*/
 
   /* Remember packet if we need to forward it. */
   p->netflood_param.queuebuf = queuebuf_new_from_packetbuf();
 
+  /*struct packet_addr *packet =
+  (struct packet_addr *)malloc(sizeof(struct packet_addr));
+  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
+  PRINTF("Packetbuf_Address before hdrreduce: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);*/
+
   packetbuf_hdrreduce(sizeof(struct netflood_hdr));
+
+ /* memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
+  PRINTF("Packetbuf_Address after hdrreduce: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);*/
+
 
   PRINTF("originator: %d.%d \n", p->netflood_param.hdr.originator.u8[0], p->netflood_param.hdr.originator.u8[1]);
   PRINTF("last_originator: %d.%d \n", p->netflood_param.last_originator.u8[0], p->netflood_param.last_originator.u8[1]);
+
   if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
       && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
 	PRINTF("no rreq! originator equals to last originator\n");
 	stack[module->stack_id].not_dest_flg = 1;
   }
-
   if (p->netflood_param.queuebuf != NULL) {
     queuebuf_free(p->netflood_param.queuebuf);
   }
@@ -167,7 +177,6 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
         queuebuf_free(p->netflood_param.queuebuf);
         p->netflood_param.queuebuf = NULL;
         memcpy(&p->netflood_param.hdr, packetbuf_dataptr(), sizeof(struct netflood_hdr));
-
         /* Rebroadcast received packet. */
         if (p->netflood_param.hops < HOPS_MAX) {
           PRINTF
@@ -186,6 +195,7 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
           rimeaddr_copy(&p->netflood_param.last_originator,
                         &p->netflood_param.hdr.originator);
           p->netflood_param.last_originator_seq_no = p->netflood_param.hdr.originator_seq_no;
+
         }
       }
       p->netflood_param.doFlood = 0;
@@ -197,7 +207,6 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
     PRINTF("c_netflood_send \n");
     if (packetbuf_hdralloc(sizeof(struct netflood_hdr))) {
       struct netflood_hdr *hdr = packetbuf_hdrptr();
-
       rimeaddr_copy(&hdr->originator, &rimeaddr_node_addr);
       rimeaddr_copy(&p->netflood_param.last_originator, &hdr->originator);
       p->netflood_param.last_originator_seq_no = hdr->originator_seq_no

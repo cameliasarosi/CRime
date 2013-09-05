@@ -72,14 +72,8 @@ stack_init()
   pi0 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch0; 
   ch0 = (struct channel*) calloc(1, sizeof(struct channel));
-  //struct mesh_p *msh_p;
-  //msh_p = (struct mesh_p*) calloc(1, sizeof(struct mesh_p));
-  //struct multihop_p *mhop_p;
-  //mhop_p = (struct multihop_p*) calloc(1, sizeof(struct multihop_p));
   stack[0].pip = pi0; 
   stack[0].pip->channel = ch0; 
-  //stack[0].pip->mesh_param = msh_p;
-  //stack[0].pip->multihop_param = mhop_p;
   stack[0].modno = 6; 
   struct stackmodule_i *amodule0; 
   amodule0 = (struct stackmodule_i*) calloc( 
@@ -167,7 +161,7 @@ stack_init()
   amodule0[4].c_timed_out = c_mesh_timedout;
 
   amodule0[5].stack_id = 0; 
-  amodule0[5].module_id = 5; 
+  amodule0[5].module_id = 5;
   amodule0[5].parent = NULL;
   amodule0[5].time_trigger_flg = 0;
   amodule0[5].c_open = c_echo_app_open;
@@ -183,17 +177,8 @@ stack_init()
   pi1 = (struct pipe*) calloc(1, sizeof(struct pipe)); 
   struct channel *ch1; 
   ch1 = (struct channel*) calloc(1, sizeof(struct channel));
-  /*struct polite_p *poli_p;
-  poli_p = (struct polite_p*) calloc(1, sizeof(struct polite_p));
-  struct netflood_p *netfl_p;
-  netfl_p = (struct netflood_p*) calloc(1, sizeof(struct netflood_p));
-  struct route_discovery_p *route_discov_p;
-  route_discov_p = (struct route_discovery_p*) calloc(1, sizeof(struct route_discovery_p));*/
   stack[1].pip = pi1; 
   stack[1].pip->channel = ch1;
-  /*stack[1].pip->polite_param = poli_p;
-  stack[1].pip->netflood_param = netfl_p;
-  stack[1].pip->route_discovery_param = route_discov_p;*/
   stack[1].modno = 5; 
   struct stackmodule_i *amodule1; 
   amodule1 = (struct stackmodule_i*) calloc( 
@@ -242,7 +227,7 @@ stack_init()
   amodule1[2].parent = NULL;
   amodule1[2].time_trigger_flg = 1;
   amodule1[2].trigger_no = 3;
-  amodule1[2].trigger_interval = 5;
+  amodule1[2].trigger_interval = 4;
   amodule1[2].c_open = c_polite_open;
   amodule1[2].c_close = c_polite_close;
   amodule1[2].c_send = c_polite_send;
@@ -435,11 +420,6 @@ stack_recv(struct stackmodule_i *module)
   PRINTF("stack_id: %d\n",module->stack_id);
   uint8_t stack_id = module->stack_id;
   uint8_t mod_id = module->module_id;
-  
-  /*if(stack[stack_id].send_rrep_flg == 1) {
-	  PRINTF("route reply was already sent\n");
-      return;
-     }*/
 
   /*if(stack[stack_id].not_dest_flg == 1) {
     return;
