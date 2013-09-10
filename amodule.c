@@ -94,25 +94,18 @@ c_recv(struct pipe *p, struct stackmodule_i *module, uint8_t len)
   if(module[len].c_recv == NULL)
 	  return;
   //printaddr(module[len].stack_id);
-  rimeaddr_t esender, sender;
+  /*rimeaddr_t esender, sender;
   rimeaddr_copy(&sender, get_node_addr(module[len].stack_id, 1, 0));
   PRINTF("sender: %d.%d \n", sender.u8[0], sender.u8[1]);
   rimeaddr_copy(&esender, get_node_addr(module[len].stack_id, 1, 1));
-  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
+  PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);*/
 
- struct packet_addr *packet =
- (struct packet_addr *)malloc(sizeof(struct packet_addr));
- memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
- PRINTF("Packetbuf_Address before: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
+  //packetbuf_print();
 
   module[len].c_recv(p, &module[len]);
   len++;
   if((len >= 0) && (len < modno)) {
-	  struct packet_addr *packet =
-			  (struct packet_addr *)malloc(sizeof(struct packet_addr));
-	  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
-	  PRINTF("Packetbuf_Address after: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
-
+	//packetbuf_print();
     c_recv(p, module, len);
   }
 
@@ -143,14 +136,7 @@ set_amodule_trigger(int stackIdx)
   param->stackidx = stackIdx;
   param->modidx = modIdx;
   param->triggerno = stack[stackIdx].amodule[modIdx].trigger_no;
-  //memcpy(&param->hdr, packetbuf_dataptr(), sizeof(struct trigger_hdr));
-  //const rimeaddr_t *dest = get_node_addr(param->stackidx, 1, 2);
-  //param->msg = packetbuf_dataptr();
-  //packetbuf_set_datalen(sizeof(struct trigger_route_msg));
-  //memcpy(&param->msg, packetbuf_dataptr(), sizeof(struct trigger_route_msg));
-  //rimeaddr_copy(&param->msg->dest, dest);
-  //PRINTF("dest: %d.%d \n", param->msg->dest.u8[0], param->msg->dest.u8[1]);
-
+  memcpy(&param->hdr, packetbuf_dataptr(), sizeof(struct trigger_hdr));
   stack[stackIdx].amodule[modIdx].trigger_init_flg = 1;
   ctimer_set(&stack[stackIdx].amodule[modIdx].timer,
              stack[stackIdx].amodule[modIdx].trigger_interval,
@@ -161,18 +147,12 @@ int
 c_send(struct pipe *p, struct stackmodule_i *module, uint8_t len)
 {
   PRINTF("c_send %d\n", len);
-  struct packet_addr *packet =
-  (struct packet_addr *)malloc(sizeof(struct packet_addr));
-  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
-  PRINTF("Packetbuf_Address before: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
+  //packetbuf_print();
   int send_flg = module[len].c_send(p, &module[len]);
   len--;
   if((len >= 0) && (len < 255) && (send_flg)) {
-	  struct packet_addr *packet =
-	        (struct packet_addr *)malloc(sizeof(struct packet_addr));
-	  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
-	  PRINTF("Packetbuf_Address after: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);
-    c_send(p, module, len);
+	  //packetbuf_print();
+	  c_send(p, module, len);
   }
   PRINTF("~c_send %d\n", len);
   return send_flg;
@@ -182,7 +162,9 @@ void
 c_triggered_send(struct trigger_param *param)
 {
   PRINTF("c_triggered_send\n");
-  //packetbuf_copyfrom(&param->hdr, sizeof(struct trigger_hdr));
+  packetbuf_copyfrom(&param->hdr, sizeof(struct trigger_hdr));
+  //channel_print();
+  //packetbuf_print();
   c_send(stack[param->stackidx].pip,
          stack[param->stackidx].amodule, param->modidx + 1);
 

@@ -281,8 +281,8 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
       rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1], from->u8[0], from->u8[1], 
       hops, msg->rreq_id, last_rreq_originator->u8[0], last_rreq_originator->u8[1], last_rreq_id);
 
-  if(!(rimeaddr_cmp(last_rreq_originator, originator)
-      && p->route_discovery_param.last_rreq_id == msg->rreq_id)) {
+  //if(!(rimeaddr_cmp(last_rreq_originator, originator)
+    //  && p->route_discovery_param.last_rreq_id == msg->rreq_id)) {
 
     PRINTF(
         "%d.%d: rreq_packet_received: request for %d.%d originator %d.%d / %d\n", 
@@ -320,7 +320,7 @@ static int rreq_packet_received(struct pipe *p, struct stackmodule_i *module)
     stack_send(&stack[module->stack_id], module->module_id - 1);
     //c_send(stack[module->stack_id].pip,stack[module->stack_id].amodule, module->module_id - 1);
 
-  }
+  //}
   PRINTF("~rreq_packet_received\n");
   //return 0; /* Don't forward packet. */
 }

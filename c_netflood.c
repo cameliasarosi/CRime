@@ -119,16 +119,7 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
   /* Remember packet if we need to forward it. */
   p->netflood_param.queuebuf = queuebuf_new_from_packetbuf();
 
-  /*struct packet_addr *packet =
-  (struct packet_addr *)malloc(sizeof(struct packet_addr));
-  memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
-  PRINTF("Packetbuf_Address before hdrreduce: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);*/
-
   packetbuf_hdrreduce(sizeof(struct netflood_hdr));
-
- /* memcpy(packet, packetbuf_dataptr(), sizeof(struct packet_addr));
-  PRINTF("Packetbuf_Address after hdrreduce: %d.%d \n", packet->addr.u8[0], packet->addr.u8[1]);*/
-
 
   PRINTF("originator: %d.%d \n", p->netflood_param.hdr.originator.u8[0], p->netflood_param.hdr.originator.u8[1]);
   PRINTF("last_originator: %d.%d \n", p->netflood_param.last_originator.u8[0], p->netflood_param.last_originator.u8[1]);
@@ -138,9 +129,9 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("no rreq! originator equals to last originator\n");
 	stack[module->stack_id].not_dest_flg = 1;
   }
-  if (p->netflood_param.queuebuf != NULL) {
+  /*if (p->netflood_param.queuebuf != NULL) {
     queuebuf_free(p->netflood_param.queuebuf);
-  }
+  }*/
 }
 
 /*---------------------------------------------------------------------------*/
