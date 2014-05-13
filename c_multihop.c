@@ -106,7 +106,7 @@ void c_multihop_close(struct pipe *p, struct stackmodule_i *module) {
 /*---------------------------------------------------------------------------*/
 int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("c_multihop_send \n");
-	//printaddr(module->stack_id);
+	printaddr(module->stack_id);
 	packetbuf_compact();
 	rimeaddr_t *nexthop;
 
@@ -130,11 +130,6 @@ int c_multihop_send(struct pipe *p, struct stackmodule_i *module) {
 		rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
 		rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
 
-		PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
-		PRINTF("ereceiver: %d.%d \n", ereceiver.u8[0], ereceiver.u8[1]);
-
-		//rimeaddr_copy(&p->receiver, nexthop);
-		//set_node_addr(module->stack_id, 0, 2, nexthop);
 		packetbuf_set_attr(PACKETBUF_ATTR_HOPS, 1);
 		return 1;
 	}
@@ -156,22 +151,11 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 	 its own needs. */
 	//rimeaddr_copy(&esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
 	rimeaddr_copy(&ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
-	//set_node_addr(module->stack_id, 1, 1, &esender);
-	//set_node_addr(module->stack_id, 1, 3, &ereceiver);
-
-	//PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);
-	PRINTF("ereceiver: %d.%d \n", ereceiver.u8[0], ereceiver.u8[1]);
-
-
-	//rimeaddr_copy(&p->in_esender, packetbuf_addr(PACKETBUF_ADDR_ESENDER));
-	//rimeaddr_copy(&p->in_ereceiver, packetbuf_addr(PACKETBUF_ADDR_ERECEIVER));
 
 	if (rimeaddr_cmp(packetbuf_addr(PACKETBUF_ADDR_ERECEIVER),
 			&rimeaddr_node_addr)) {
 		stack[module->stack_id].resend_flg = 1;
 		PRINTF("for us!\n");
-		//stack[module->stack_id].number_packets_received += 1;
-		//PRINTF("number of packets received: %d \n", stack[module->stack_id].number_packets_received);
 		p->multihop_param.hop_no = packetbuf_attr(PACKETBUF_ATTR_HOPS);
 	} else {
 		nexthop = c_forward(p, stack[module->stack_id].amodule, stack[module->stack_id].modno);
@@ -193,13 +177,30 @@ void c_multihop_recv(struct pipe *p, struct stackmodule_i *module) {
 
 rimeaddr_t *
 c_multihop_forward(struct pipe *p, struct stackmodule_i *module) {
-	PRINTF("multihop forward \n");
-	struct route_entry *rt;
+	printf("multihop forward \n");
+	struct route_entry *rt, *previous_rt;
 	rimeaddr_t *tmpaddr = get_node_addr(module->stack_id, 0, 3);
 	rt = route_lookup(tmpaddr);
 	if (rt == NULL) {
 		return NULL;
 	} else {
+		/*if(clock_time()*1000/CLOCK_SECOND < 50100 && rimeaddr_node_addr.u8[0] == 1) {
+			previous_rt->nexthop.u8[0] = rt->nexthop.u8[0];
+			previous_rt->cost = rt->cost;
+		}
+		if(clock_time()*1000/CLOCK_SECOND > 50100 && rimeaddr_node_addr.u8[0] == 1 && rt->nexthop.u8[0] == previous_rt->nexthop.u8[0] && previous_rt->cost == rt->cost) {
+			route_remove(rt);
+			rt = route_lookup(tmpaddr);
+		}*/
+		
+		/*if(clock_time()*1000/CLOCK_SECOND < 50100) {
+			previous_rt->nexthop.u8[0] = rt->nexthop.u8[0];
+			previous_rt->cost = rt->cost;
+		}
+		if(clock_time()*1000/CLOCK_SECOND > 50100 && rt->nexthop.u8[0] == previous_rt->nexthop.u8[0] && previous_rt->cost == rt->cost) {
+			route_remove(rt);
+			return NULL;
+		}*/		
 		route_refresh(rt);
 	}
 	PRINTF("~c_multihop_forward \n");

@@ -83,7 +83,7 @@
 	uint16_t hop_no;
 };*/
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -111,7 +111,7 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
   p->hop_no=p->netflood_param.hops;
   //rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
   set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
-  printaddr(module->stack_id);
+  //printaddr(module->stack_id);
   /*rimeaddr_t esender;
   rimeaddr_copy(&esender, get_node_addr(module->stack_id, 1, 1));
   PRINTF("esender: %d.%d \n", esender.u8[0], esender.u8[1]);*/
@@ -121,8 +121,8 @@ void c_netflood_recv(struct pipe *p, struct stackmodule_i *module) {
 
   packetbuf_hdrreduce(sizeof(struct netflood_hdr));
 
-  PRINTF("originator: %d.%d \n", p->netflood_param.hdr.originator.u8[0], p->netflood_param.hdr.originator.u8[1]);
-  PRINTF("last_originator: %d.%d \n", p->netflood_param.last_originator.u8[0], p->netflood_param.last_originator.u8[1]);
+  //PRINTF("originator: %d.%d \n", p->netflood_param.hdr.originator.u8[0], p->netflood_param.hdr.originator.u8[1]);
+  //PRINTF("last_originator: %d.%d \n", p->netflood_param.last_originator.u8[0], p->netflood_param.last_originator.u8[1]);
 
   if ((rimeaddr_cmp(&p->netflood_param.hdr.originator, &p->netflood_param.last_originator)
       && p->netflood_param.hdr.originator_seq_no<= p->netflood_param.last_originator_seq_no)) {
@@ -179,7 +179,7 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
            p->netflood_param.last_originator_seq_no, p->netflood_param.hops);
           //rimeaddr_copy(&p->esender, &p->netflood_param.hdr.originator);
           set_node_addr(module->stack_id, 1, 1, &p->netflood_param.hdr.originator);
-          printaddr(module->stack_id);
+          //printaddr(module->stack_id);
           p->netflood_param.hdr.hop_no++;
           memcpy(packetbuf_dataptr(), &p->netflood_param.hdr, sizeof(struct netflood_hdr));
           //stack_send(&stack[module->stack_id], module->module_id);
@@ -208,7 +208,7 @@ int c_netflood_send(struct pipe *p, struct stackmodule_i *module) {
 		 hdr->originator.u8[0], hdr->originator.u8[1],
 		 hdr->originator_seq_no, hdr->hop_no = 0,
 		 (char *)packetbuf_hdrptr()); */
-      printaddr(module->stack_id);
+      //printaddr(module->stack_id);
       return 1;
     }
     return 0;

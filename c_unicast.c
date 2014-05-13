@@ -65,7 +65,7 @@
 #include <string.h>
 
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -133,7 +133,7 @@ c_unicast_recv(struct pipe *p, struct stackmodule_i *module)
   }
 
   PRINTF("~c_unicast_recv \n");
-   //printaddr(module->stack_id);
+  printaddr(module->stack_id);
 }
 
 /*---------------------------------------------------------------------------*/

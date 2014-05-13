@@ -19,7 +19,7 @@
 #include "net/rime/crime/c_netflood.h"
 
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -238,7 +238,7 @@ c_forward(struct pipe *p, struct stackmodule_i *module, uint8_t len)
   rimeaddr_t *tmpaddr;
   for(;;) {
   ///for(len;len > 0; len--) {
-	PRINTF("len: %d \n", len);
+	//PRINTF("len: %d \n", len);
     if((len >= 0) && (len < 255) && (module[len].c_forward != NULL)) {
       tmpaddr = module[len].c_forward(p, &module[len]);
       PRINTF("%d.%d %d %d %d\n", tmpaddr->u8[0], tmpaddr->u8[1], len,

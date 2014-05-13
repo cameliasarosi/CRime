@@ -63,7 +63,7 @@
 
 #include <stddef.h>             /* For offsetof */
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -157,6 +157,7 @@ int c_mesh_send(struct pipe *p, struct stackmodule_i *module) {
 	PRINTF("%d.%d: mesh_send to %d.%d\n",
 			rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
 			tmpaddr->u8[0], tmpaddr->u8[1]);
+	//route_output();
 	//stack[module->stack_id].number_packets_sent += 1;
 	//PRINTF("number of packets sent: %d \n", stack[module->stack_id].number_packets_sent);
 	could_send = stack_send(stack, module->module_id - 1);

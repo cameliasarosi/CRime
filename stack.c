@@ -21,7 +21,7 @@
 #include "net/rime/crime/c_route_discovery.h"
 #include "net/rime/crime/c_echo_app.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -227,7 +227,7 @@ stack_init()
   amodule1[2].parent = NULL;
   amodule1[2].time_trigger_flg = 1;
   amodule1[2].trigger_no = 3;
-  amodule1[2].trigger_interval = 4;
+  amodule1[2].trigger_interval =6;
   amodule1[2].c_open = c_polite_open;
   amodule1[2].c_close = c_polite_close;
   amodule1[2].c_send = c_polite_send;
@@ -417,7 +417,7 @@ void
 stack_recv(struct stackmodule_i *module)
 {
   PRINTF("stack_recv \n");
-  PRINTF("stack_id: %d\n",module->stack_id);
+  //PRINTF("stack_id: %d\n",module->stack_id);
   uint8_t stack_id = module->stack_id;
   uint8_t mod_id = module->module_id;
 
